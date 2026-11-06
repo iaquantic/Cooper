@@ -2,6 +2,9 @@
 # v011 (ajustes tras aprobar v010): encuadre del busto más bajo y común a las siete expresiones (las rayitas
 # de énfasis entran enteras), y T2 (portátil), T3 (taza) y T6 (checklist) relajados junto a la sudadera
 # siempre que su accesorio no se usa; cada uno sube solo en su clip (Tecleo, Relax, Organizar).
+# Además (pedido ampliado de Quantic): dos tentáculos son BRAZOS que salen por las mangas de la sudadera:
+# T2 (brazo izquierdo, portátil) y T7 (brazo derecho, taza). El móvil pasa al tentáculo inferior T3. Las
+# mangas son tubos de la sudadera con puño de costura, pesados a la cadena del brazo.
 # Colores, proporciones, nombres Acc_* y visibilidad por modo: sin cambios.
 # Parte de build_v009.py. Pedido de Quantic/Leo del 2026-11-06: Cooper lleva un solo accesorio según el
 # modo. Cada accesorio cuelga de un hueso de visibilidad con nombre fijo (Acc_Bombilla, Acc_Laptop,
@@ -305,22 +308,24 @@ R_ROOT = 0.064
 RADII = [1.0, 0.84, 0.62, 0.40, 0.22]
 TENT = {
     "T1_Bombilla":  [(-0.09, 0.02, 0.28), (-0.26, 0.00, 0.34), (-0.34, -0.02, 0.56), (-0.31, -0.05, 0.78), (-0.25, -0.06, 0.88)],
-    "T2_Laptop":    [(-0.10, -0.02, 0.27), (-0.27, -0.09, 0.29), (-0.39, -0.13, 0.37), (-0.40, -0.17, 0.47), (-0.34, -0.19, 0.50)],
-    "T3_Taza":      [(-0.08, -0.05, 0.26), (-0.21, -0.14, 0.17), (-0.31, -0.19, 0.15), (-0.35, -0.22, 0.23), (-0.31, -0.24, 0.29)],
+    "T2_BrazoIzq":  [(-0.12, -0.01, 0.45), (-0.25, -0.08, 0.39), (-0.32, -0.15, 0.38), (-0.31, -0.21, 0.40), (-0.25, -0.24, 0.41)],   # brazo izquierdo (hombro → mano, sostiene el portátil delante)
+    "T3_Movil":      [(-0.08, -0.05, 0.26), (-0.21, -0.14, 0.17), (-0.31, -0.19, 0.15), (-0.35, -0.22, 0.23), (-0.31, -0.24, 0.29)],
     "T4_PieIzq":    [(-0.05, -0.07, 0.25), (-0.13, -0.19, 0.11), (-0.22, -0.27, 0.045), (-0.33, -0.25, 0.045), (-0.37, -0.20, 0.10)],
     "T5_PieDer":    [(0.05, -0.07, 0.25), (0.13, -0.19, 0.11), (0.22, -0.27, 0.045), (0.33, -0.25, 0.045), (0.37, -0.20, 0.10)],
     "T6_Checklist": [(0.08, -0.05, 0.26), (0.23, -0.12, 0.18), (0.33, -0.16, 0.14), (0.39, -0.19, 0.22), (0.36, -0.21, 0.29)],
-    "T7_Movil":     [(0.10, -0.02, 0.27), (0.26, -0.06, 0.33), (0.33, -0.11, 0.45), (0.31, -0.15, 0.55), (0.26, -0.17, 0.57)],
+    "T7_BrazoDer":  [(0.12, -0.01, 0.45), (0.25, -0.07, 0.41), (0.33, -0.12, 0.46), (0.31, -0.15, 0.55), (0.26, -0.17, 0.57)],      # brazo derecho (hombro → mano, sostiene la taza)
     "T8_Trasero":   [(0.00, 0.09, 0.26), (0.07, 0.23, 0.12), (0.15, 0.33, 0.045), (0.26, 0.37, 0.045), (0.31, 0.33, 0.10)],
 }
-def make_curve(name, pts):
+ARMS = ("T2_BrazoIzq", "T7_BrazoDer")
+RADII_ARM = [1.0, 0.92, 0.78, 0.50, 0.26]    # los brazos son algo más finos; la manga los cubre hasta el codo y la mano asoma por el puño
+def make_curve(name, pts, depth=None, radii=None, mat_=None):
     cd = bpy.data.curves.new(name, 'CURVE'); cd.dimensions = '3D'
-    cd.resolution_u = 12; cd.bevel_depth = R_ROOT; cd.bevel_resolution = 7
+    cd.resolution_u = 12; cd.bevel_depth = depth or R_ROOT; cd.bevel_resolution = 7
     cd.fill_mode = 'FULL'; cd.use_fill_caps = False
     sp = cd.splines.new('BEZIER'); sp.bezier_points.add(len(pts) - 1)
-    for i, (p, r) in enumerate(zip(pts, RADII)):
+    for i, (p, r) in enumerate(zip(pts, radii or RADII)):
         bp = sp.bezier_points[i]; bp.co = p; bp.handle_left_type = bp.handle_right_type = 'AUTO'; bp.radius = r
-    o = bpy.data.objects.new(name, cd); C_SRC.objects.link(o); o.data.materials.append(M['cuerpo'])
+    o = bpy.data.objects.new(name, cd); C_SRC.objects.link(o); o.data.materials.append(mat_ or M['cuerpo'])
     return o
 def eval_curve(obj, n=24):
     bps = obj.data.splines[0].bezier_points; res = []
@@ -343,14 +348,15 @@ def close_tube(o):
     bm.to_mesh(o.data); bm.free(); o.data.update()
 tent_meshes = {}
 for name, pts in TENT.items():
-    c = make_curve(name + "_Curva", pts); vl.update()
+    c = make_curve(name + "_Curva", pts, depth=(R_ROOT * 0.875 if name in ARMS else None), radii=(RADII_ARM if name in ARMS else None)); vl.update()
     m = c.copy(); m.data = c.data.copy(); m.name = name; C_CHAR.objects.link(m)
     bpy.ops.object.select_all(action='DESELECT'); m.select_set(True); vl.objects.active = m
     bpy.ops.object.convert(target='MESH'); close_tube(m); bpy.ops.object.shade_smooth()
     c.hide_viewport = True; c.hide_render = True
     pts_ev = eval_curve(c); L = len(pts_ev); parts = []
-    for j in range(8):
-        idx = int((0.10 + 0.86 * j / 7) * (L - 1)); p, r = pts_ev[idx]
+    n_v, v0, v1 = (5, 0.66, 0.96) if name in ARMS else (8, 0.10, 0.96)   # brazos: ventosas solo en la mano que asoma por el puño
+    for j in range(n_v):
+        idx = int((v0 + (v1 - v0) * j / (n_v - 1)) * (L - 1)); p, r = pts_ev[idx]
         p2 = pts_ev[min(idx + 1, L - 1)][0]; tang = (p2 - p).normalized()
         down = Vector((0, -1, -0.7)).normalized()
         d = down - tang * down.dot(tang); d = d.normalized() if d.length > 1e-4 else Vector((0, -1, 0))
@@ -362,6 +368,21 @@ for name, pts in TENT.items():
     for s in parts: s.select_set(True)
     m.select_set(True); vl.objects.active = m; bpy.ops.object.join()
     tent_meshes[name] = m
+# mangas: tubo de sudadera sobre la primera mitad de cada brazo, con puño de costura; se pesan a la cadena del brazo
+sleeves = {}
+for an, side in zip(ARMS, ("I", "D")):
+    pts3 = TENT[an][:3]
+    co = make_curve(f"Manga_{side}_Curva", pts3, depth=0.070, radii=[1.0, 0.90, 0.72], mat_=M['sudadera']); vl.update()
+    m = co.copy(); m.data = co.data.copy(); m.name = f"Manga_{side}"; C_CHAR.objects.link(m)
+    bpy.ops.object.select_all(action='DESELECT'); m.select_set(True); vl.objects.active = m
+    bpy.ops.object.convert(target='MESH'); close_tube(m); bpy.ops.object.shade_smooth()
+    co.hide_viewport = True; co.hide_render = True
+    ev = eval_curve(co); p_end, r_end = ev[-1]; tang = (ev[-1][0] - ev[-2][0]).normalized()
+    cuff = torus(f"Costura_Puno_{side}", p_end, r_end, 0.003, m=M['costura'], rot=tang.to_track_quat('Z', 'Y').to_euler(), maj=32, mino=6)
+    p_sh, r_sh = ev[0]; tsh = (ev[1][0] - ev[0][0]).normalized()
+    shoulder = torus(f"Costura_Hombro_{side}", p_sh + tsh * 0.075, r_sh * 1.02, 0.003, m=M['costura'], rot=tsh.to_track_quat('Z', 'Y').to_euler(), maj=32, mino=6)
+    bpy.ops.object.select_all(action='DESELECT'); cuff.select_set(True); shoulder.select_set(True); m.select_set(True); vl.objects.active = m; bpy.ops.object.join()
+    sleeves[an] = m
 
 # ---------------------------------------------------------------- accesorios
 def acc_coll(name):
@@ -398,7 +419,7 @@ def vis_group(name, objs, loc):
     return e
 luz_e = vis_group("Luz", [b_glass, b_fil] + rays, (bx, by, bz + 0.12))          # encendida: vidrio emisivo, filamento y rayos
 luzoff_e = vis_group("LuzOff", [b_glass_off, b_fil_off], (bx, by, bz + 0.12))   # apagada: vidrio mate y filamento oscuro
-lx, ly, lz = -0.42, -0.15, 0.49
+lx, ly, lz = -0.16, -0.23, 0.41   # v011: delante del pecho, a la izquierda; lo sostiene la mano izquierda (T2)
 l_base = cube("Laptop_Base", (lx, ly, lz), (0.18, 0.13, 0.008), M['gris'], rot=(0, 0, 0.15), c=A)
 l_lid = cube("Laptop_Tapa", (lx - 0.01, ly - 0.062, lz + 0.06), (0.18, 0.008, 0.125), M['gris'], rot=(-0.25, 0, 0.15), c=A)
 def screen_mat(name, png, emit=1.6, rough=0.25, alpha=False):
@@ -437,16 +458,16 @@ bpy.ops.mesh.primitive_plane_add(size=1, location=(kc.x, kc.y, lz + 0.0112)); l_
 l_letters.name = "Laptop_Letras"; l_letters.scale = (0.157, 0.062, 1); l_letters.rotation_euler = (0, 0, 0.15 + math.pi)   # legible desde el lado de la pantalla
 l_letters.data.materials.append(screen_mat('Q_Teclas', 'teclas.png', emit=0.0, rough=0.6, alpha=True)); link(l_letters, A)
 group("Grp_Laptop", [l_base, l_lid, l_scr, l_q, l_kb, l_hinge, l_key, l_tp, l_letters], "Acc_Laptop")
-px, py, pz = 0.29, -0.20, 0.61
-p_body = cube("Movil_Cuerpo", (px, py, pz), (0.058, 0.009, 0.115), M['negro'], rot=(0.1, 0.15, -0.25), c=A)
-R_ph = Matrix.Rotation(-0.25, 4, 'Z') @ Matrix.Rotation(0.15, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
+px, py, pz = -0.33, -0.27, 0.32   # v011: el móvil lo lleva el tentáculo inferior izquierdo T3
+p_body = cube("Movil_Cuerpo", (px, py, pz), (0.058, 0.009, 0.115), M['negro'], rot=(0.1, -0.15, 0.25), c=A)
+R_ph = Matrix.Rotation(0.25, 4, 'Z') @ Matrix.Rotation(-0.15, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
 p_scr = screen_plane("Movil_Pantalla", Vector((px, py, pz)) + (R_ph @ Vector((0, -0.0047, 0))), (0.050, 0.100), R_ph,
                      screen_mat('Q_PantallaMovil', 'pantalla_movil.png'))
-Rp = Matrix.Rotation(-0.25, 4, 'Z') @ Matrix.Rotation(0.15, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
-p_cam = cyl("Movil_Camara", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, 0.046))), 0.004, 0.002, M['gris'], rot=(math.pi / 2 + 0.1, 0.15, -0.25), verts=12, c=A)
-p_bar = cube("Movil_Barra", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, -0.047))), (0.022, 0.001, 0.003), M['blanco'], rot=(0.1, 0.15, -0.25), c=A)
+Rp = Matrix.Rotation(0.25, 4, 'Z') @ Matrix.Rotation(-0.15, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
+p_cam = cyl("Movil_Camara", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, 0.046))), 0.004, 0.002, M['gris'], rot=(math.pi / 2 + 0.1, -0.15, 0.25), verts=12, c=A)
+p_bar = cube("Movil_Barra", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, -0.047))), (0.022, 0.001, 0.003), M['blanco'], rot=(0.1, -0.15, 0.25), c=A)
 group("Grp_Movil", [p_body, p_scr, p_cam, p_bar], "Acc_Movil")
-tx, ty, tz = -0.33, -0.27, 0.30
+tx, ty, tz = 0.28, -0.20, 0.58   # v011: la taza la lleva la mano derecha (brazo T7)
 TAZA_GIRO = math.radians(-90)   # gira el cilindro para que el centro de la tira UV (logo) mire al frente (-Y)
 def uv_cylinder(name, loc, r, h, m, N=48, front=-math.pi / 2, c=C_ACC):
     """cilindro con UV explícito: u da la vuelta (u=0,5 en el ángulo 'front', hacia -Y), v = altura; tapas en una esquina del mapa"""
@@ -474,9 +495,9 @@ def uv_cylinder(name, loc, r, h, m, N=48, front=-math.pi / 2, c=C_ACC):
 t_body = uv_cylinder("Taza_Cuerpo", (tx, ty, tz), 0.044, 0.088, screen_mat('Q_Taza', 'taza.png', emit=0.0, rough=0.35), c=A)
 t_in = cyl("Taza_Cafe", (tx, ty, tz + 0.0405), 0.039, 0.01, mat('Q_Cafe', '#3A2414', 0.15), c=A)   # café al ras del borde (v009)
 # asa en medio óvalo (forma de D): toro alargado en vertical, con la mitad interior recortada; sobresale por el lateral -X
-t_h = torus("Taza_Asa", (tx - 0.044 + 0.004, ty, tz), 0.030, 0.0075, M['negro'], rot=(math.pi / 2, 0, 0), c=A)
+t_h = torus("Taza_Asa", (tx + 0.044 - 0.004, ty, tz), 0.030, 0.0075, M['negro'], rot=(math.pi / 2, 0, 0), c=A)   # asa hacia fuera (+X)
 t_h.scale = (0.75, 1.15, 1.0)                       # más alto que ancho (local Y = mundo Z tras el giro de 90° en X)
-bisect_keep(t_h, (0.0, 0, 0), (-1, 0, 0), keep_positive=True)   # conserva solo la mitad exterior (x local <= 0)
+bisect_keep(t_h, (0.0, 0, 0), (1, 0, 0), keep_positive=True)    # conserva solo la mitad exterior (x local >= 0)
 group("Grp_Taza", [t_body, t_in, t_h], "Acc_Taza")
 cx, cy, cz = 0.41, -0.24, 0.34; rotc = (0.1, -0.1, -0.2)
 c_board = cube("Checklist_Tabla", (cx, cy, cz), (0.095, 0.008, 0.125), M['negro'], rot=rotc, c=A)
@@ -575,8 +596,8 @@ for tn in TENT:
     chains[tn] = names
     tip = pts[-1]; d = (pts[-1] - pts[-2]).normalized() * 0.05
     bone(f"{tn}_IK", tip, tip + d, "Root", ctrl=True, deform=False); ik_targets[tn] = f"{tn}_IK"
-ACC_PARENT = {"Acc_Bombilla": ("Grp_Bombilla", "T1_Bombilla.003"), "Acc_Laptop": ("Grp_Laptop", "T2_Laptop.003"), "Acc_Taza": ("Grp_Taza", "T3_Taza.003"),
-              "Acc_Checklist": ("Grp_Checklist", "T6_Checklist.003"), "Acc_Movil": ("Grp_Movil", "T7_Movil.003"), "Acc_Panel": ("Grp_Panel", "Panel")}
+ACC_PARENT = {"Acc_Bombilla": ("Grp_Bombilla", "T1_Bombilla.003"), "Acc_Laptop": ("Grp_Laptop", "T2_BrazoIzq.003"), "Acc_Taza": ("Grp_Taza", "T7_BrazoDer.003"),
+              "Acc_Checklist": ("Grp_Checklist", "T6_Checklist.003"), "Acc_Movil": ("Grp_Movil", "T3_Movil.003"), "Acc_Panel": ("Grp_Panel", "Panel")}
 ACC = set(ACC_PARENT)
 for an, (gn, parent_bone) in ACC_PARENT.items():   # un hueso de visibilidad por accesorio, con nombre fijo
     gc = bpy.data.objects[gn].matrix_world.translation
@@ -614,10 +635,9 @@ for an, (gn, _) in ACC_PARENT.items():
 def seg_param(p, a, b):
     ab = b - a; t = (p - a).dot(ab) / max(ab.length_squared, 1e-12); t = max(0.0, min(1.0, t))
     return t, ((a + ab * t) - p).length
-for tn, names in chains.items():
+def skin_to_chain(o, names):
     bones = [arm.data.bones[n] for n in names]
     pts = [arm.matrix_world @ b.head_local for b in bones] + [arm.matrix_world @ bones[-1].tail_local]
-    o = tent_meshes[tn]
     for vg in list(o.vertex_groups): o.vertex_groups.remove(vg)
     vgs = [o.vertex_groups.new(name=n) for n in names]; mw = o.matrix_world
     for v in o.data.vertices:
@@ -631,6 +651,9 @@ for tn, names in chains.items():
             if w > 0: vg.add([v.index], w, 'REPLACE')
     mod = o.modifiers.new("Armature", 'ARMATURE'); mod.object = arm
     o.parent = arm; o.matrix_parent_inverse = arm.matrix_world.inverted()
+for tn, names in chains.items():
+    skin_to_chain(tent_meshes[tn], names)
+    if tn in sleeves: skin_to_chain(sleeves[tn], names)
 vl.update()
 
 # ---------------------------------------------------------------- expresiones (acción "Expresiones", fotogramas 0-6)
@@ -670,13 +693,13 @@ def mode(*visible):
     for a in ACC: (show if a in visible else hide)(a)
 D = math.radians
 tip_rest = {tn: (arm.matrix_world @ arm.data.bones[ik_targets[tn]].head_local).copy() for tn in TENT}
-T1_DOWN = Vector((-0.34, 0.06, 0.40))                      # T1 relajado junto a la sudadera (fuera del encuadre del busto) cuando no sostiene la bombilla
-T7_DOWN = Vector((0.34, 0.06, 0.40))                       # T7 (móvil) relajado en el lado contrario; ningún clip usa el móvil
-# v011: posiciones relajadas de los tentáculos que sostienen accesorios (punta en el suelo o junto a la sudadera)
-TENT_DOWN = {"T1_Bombilla": T1_DOWN, "T7_Movil": T7_DOWN,
-             "T2_Laptop": Vector((-0.42, -0.08, 0.07)),     # al suelo, a la izquierda, por fuera del pie T4
-             "T3_Taza": Vector((-0.21, -0.35, 0.06)),       # al suelo, delante-izquierda, entre T4 y el centro
-             "T6_Checklist": Vector((0.21, -0.35, 0.06))}   # al suelo, delante-derecha, simétrico a T3
+T1_DOWN = Vector((-0.30, 0.16, 0.07))                      # T1 relajado en el suelo, atrás-izquierda (entre T4 y T8), cuando no sostiene la bombilla
+# v011: posiciones relajadas de los tentáculos que sostienen accesorios; los brazos cuelgan a los lados
+TENT_DOWN = {"T1_Bombilla": T1_DOWN,
+             "T2_BrazoIzq": Vector((-0.28, -0.11, 0.18)),    # brazo izquierdo colgando junto a la sudadera, mano bajo el dobladillo
+             "T7_BrazoDer": Vector((0.28, -0.11, 0.18)),     # brazo derecho colgando junto a la sudadera
+             "T3_Movil": Vector((-0.21, -0.35, 0.06)),       # móvil: al suelo, delante-izquierda
+             "T6_Checklist": Vector((0.21, -0.35, 0.06))}   # checklist: al suelo, delante-derecha
 idle_rest = dict(tip_rest); idle_rest.update(TENT_DOWN)
 def tent_to(tn, world): set_world_loc(PB[ik_targets[tn]], world)
 BROW_R = arm.data.bones["Ceja_I"].length
@@ -693,12 +716,12 @@ reset(); show("Marcas"); brow("I", 0.018); brow("D", 0.018); KEYS["O"].value = 1
 # 3 pensativo: mirada arriba-izquierda, ceja I arriba, ceja D abajo, puchero, tentáculo D en la barbilla
 reset(); lids(40, 40); set_world_loc(PB["Mirada"], (-0.25, -0.55, ez + 0.22))
 brow("I", 0.012, 12); brow("D", -0.005, -6); KEYS["Puchero"].value = 1.0; PB["Cabeza"].rotation_euler.z = D(8)
-tent_to("T5_PieDer", (0.07, -0.235, 0.46)); key_all(3)
+tent_to("T2_BrazoIzq", (-0.06, -0.235, 0.46)); key_all(3)   # v011: la mano izquierda va a la barbilla
 # 4 guiñando: ojo I cerrado, ceja I bajada, sonrisa
 reset(); lids(180, 0); show("OjoFeliz_I"); brow("I", -0.008, -10); brow("D", 0.010); PB["Cabeza"].rotation_euler.z = D(-6); key_all(4)
 # 5 serio: párpados a medio cerrar, cejas bajas e inclinadas, boca plana, tentáculos cruzados
 reset(); lids(100, 100); brow("I", -0.012, -18); brow("D", -0.012, 18); KEYS["Plano"].value = 1.0
-tent_to("T4_PieIzq", (0.14, -0.24, 0.36)); tent_to("T5_PieDer", (-0.14, -0.245, 0.40)); key_all(5)
+tent_to("T2_BrazoIzq", (0.10, -0.21, 0.36)); tent_to("T7_BrazoDer", (-0.10, -0.215, 0.40)); key_all(5)   # v011: brazos cruzados
 # 6 risa: ojos cerrados, cabeza hacia atrás, boca abierta a carcajada
 reset(); lids(180, 180); show("OjoFeliz_I", "OjoFeliz_D", "Dientes", "Marcas"); brow("I", 0.014); brow("D", 0.014); KEYS["Risa"].value = 1.0
 PB["Cabeza"].rotation_euler.x = D(-14); key_all(6)
@@ -794,13 +817,13 @@ def make_clip(name, length, keyer, step=4, with_light=False, acc=True):
     reset(); return acts
 LAPTOP = bpy.data.objects["Laptop_Teclado"].matrix_world.translation.copy()
 def k_saludo(f, u):
-    """T5 (pie derecho) se levanta y saluda; cara contenta; sin accesorios"""
+    """el brazo derecho (T7) se levanta y saluda; cara contenta; sin accesorios"""
     mode()
-    up = min(1.0, f / 8.0); back = max(0.0, (f - 40) / 8.0)
+    up = smooth(f / 8.0); back = smooth((f - 40) / 8.0)
     lift = up * (1 - back)
     wave = math.sin((f - 8) / 32.0 * 2 * math.pi * 2) if 8 <= f <= 40 else 0.0
-    target = tip_rest["T5_PieDer"].lerp(Vector((0.38 + 0.09 * wave, -0.34, 0.72)), lift)
-    tent_to("T5_PieDer", target)
+    target = TENT_DOWN["T7_BrazoDer"].lerp(Vector((0.28 + 0.06 * wave, -0.20, 0.60)), lift)
+    tent_to("T7_BrazoDer", target)
     PB["Cabeza"].rotation_euler.z = D(5) * lift; brow("I", 0.006 * lift); brow("D", 0.006 * lift)
     KEYS["Risa"].value = 0.3 * lift
     if 10 <= f <= 38: show("OjoFeliz_I", "OjoFeliz_D"); lids(180, 180)
@@ -814,48 +837,53 @@ def k_idea(f, u):
     tent_to("T1_Bombilla", T1_DOWN.lerp(tip_rest["T1_Bombilla"], up) + Vector((0, 0, bounce)))
     tilt = min(1.0, max(0.0, (f - 8) / 10.0)) * (1 - max(0.0, (f - 36) / 12.0))
     PB["Cabeza"].rotation_euler.x = D(-6) * tilt; brow("I", 0.016 * tilt); brow("D", 0.016 * tilt)
+    for an, sx in (("T2_BrazoIzq", -1), ("T7_BrazoDer", 1)):   # los brazos se abren un poco con la sorpresa
+        tent_to(an, TENT_DOWN[an].lerp(Vector((sx * 0.33, -0.14, 0.33)), tilt))
     if 20 <= f <= 34: show("Marcas"); KEYS["O"].value = 1.0
     elif f > 34: KEYS["Risa"].value = 0.35; show("Dientes")
 def k_tecleo(f, u):
-    """mira al laptop y teclea con T4 (pie izquierdo); parpadeo a mitad; solo el portátil"""
+    """el brazo izquierdo sube el portátil, mira la pantalla y teclea con la mano derecha; parpadeo a mitad; solo el portátil"""
     mode("Acc_Laptop")
     tap = abs(math.sin(f / 48.0 * 2 * math.pi * 4))
     lift = smooth(f / 10.0) * smooth(1 - (f - 40) / 8.0)
-    tent_to("T2_Laptop", TENT_DOWN["T2_Laptop"].lerp(tip_rest["T2_Laptop"], lift))   # v011: T2 sube el portátil solo aquí
+    tent_to("T2_BrazoIzq", TENT_DOWN["T2_BrazoIzq"].lerp(tip_rest["T2_BrazoIzq"], lift))   # v011: T2 sube el portátil solo aquí
     reach = smooth((f - 6) / 8.0) * (1 - max(0.0, (f - 42) / 6.0))
-    key_pos = LAPTOP + Vector((0.02 * math.sin(f / 48.0 * 2 * math.pi * 2), -0.02, 0.02 + 0.03 * tap))
-    tent_to("T4_PieIzq", tip_rest["T4_PieIzq"].lerp(key_pos, reach))
+    vl.update(); kb = bpy.data.objects["Laptop_Teclado"].matrix_world.translation.copy()   # teclado donde está ahora el portátil
+    key_pos = kb + Vector((0.045 + 0.015 * math.sin(f / 48.0 * 2 * math.pi * 2), -0.02, 0.02 + 0.03 * tap))
+    tent_to("T7_BrazoDer", TENT_DOWN["T7_BrazoDer"].lerp(key_pos, reach))   # v011: teclea la mano derecha
     PB["Cabeza"].rotation_euler.z = D(-18) * reach; PB["Cabeza"].rotation_euler.x = D(6) * reach
-    set_world_loc(PB["Mirada"], Vector((0, -0.55, ez)).lerp(LAPTOP + Vector((0, -0.05, 0.08)), reach))
+    set_world_loc(PB["Mirada"], Vector((0, -0.55, ez)).lerp(kb + Vector((0, -0.05, 0.08)), reach))
     lids(25 * reach, 25 * reach)
     if 22 <= f <= 26: lids(180, 180)
 MOUTH = bpy.data.objects["Boca"].matrix_world.translation.copy()
 CHECK = bpy.data.objects["Checklist_Hoja"].matrix_world.translation.copy()
 def smooth(x): x = min(1.0, max(0.0, x)); return x * x * (3 - 2 * x)
 def k_relax(f, u):
-    """bucle tranquilo: T3 sube la taza a la boca, sorbo con ojos cerrados, baja y sonríe; solo la taza"""
+    """bucle tranquilo: la mano derecha (T7) sube la taza a la boca, sorbo con ojos cerrados, baja y sonríe; solo la taza"""
     mode("Acc_Taza")
     if f <= 18: s = smooth(f / 18.0)
     elif f <= 42: s = 1.0
     elif f <= 60: s = smooth(1 - (f - 42) / 18.0)
     else: s = 0.0
-    sip = MOUTH + Vector((0.02, -0.05, -0.055))                 # punta de T3: la taza queda delante de los labios
-    tent_to("T3_Taza", TENT_DOWN["T3_Taza"].lerp(sip, s))   # v011: la taza parte de la posición relajada
+    sip = MOUTH + Vector((-0.02, -0.05, -0.055))                # mano derecha: la taza queda delante de los labios
+    tent_to("T7_BrazoDer", TENT_DOWN["T7_BrazoDer"].lerp(sip, s))
     PB["Cabeza"].rotation_euler.x = D(-7) * s; PB["Root"].location.z = 0.004 * math.sin(2 * math.pi * f / 72.0)
     brow("I", 0.004 * s); brow("D", 0.004 * s)
     if 22 <= f <= 40: lids(180, 180); show("OjoFeliz_I", "OjoFeliz_D"); KEYS["O"].value = 0.5
     else: lids(18 * s, 18 * s)
     if f >= 48 or f <= 6: KEYS["Risa"].value = 0.25 * (1 - s)   # sonrisa relajada al bajar la taza
 def k_organizar(f, u):
-    """T5 (pie derecho) marca una tarea en la checklist que sostiene T6; mira la hoja y sonríe; checklist y panel"""
+    """T6 sube la checklist y la mano derecha (T7) marca una tarea; mira la hoja y sonríe; checklist y panel"""
     mode("Acc_Checklist", "Acc_Panel")
     reach = smooth(f / 10.0) * smooth(1 - (f - 38) / 10.0)
-    tent_to("T6_Checklist", TENT_DOWN["T6_Checklist"].lerp(tip_rest["T6_Checklist"], reach))   # v011: T6 sube la checklist solo aquí
+    CK_UP = tip_rest["T6_Checklist"] + Vector((-0.06, -0.02, 0.0))   # un poco hacia el centro: la mano derecha llega a la hoja
+    tent_to("T6_Checklist", TENT_DOWN["T6_Checklist"].lerp(CK_UP, reach))   # v011: T6 sube la checklist solo aquí
     tap = math.sin(math.pi * (f - 16) / 8.0) if 16 <= f <= 24 else 0.0
-    pos = CHECK + Vector((-0.015, -0.045 + 0.02 * tap, 0.01))     # delante de la hoja (mira a -Y); el toque acerca la punta
-    tent_to("T5_PieDer", tip_rest["T5_PieDer"].lerp(pos, reach))
+    vl.update(); ck = bpy.data.objects["Checklist_Hoja"].matrix_world.translation.copy()   # hoja donde está ahora la checklist
+    pos = ck + Vector((-0.015, -0.045 + 0.02 * tap, 0.01))     # delante de la hoja (mira a -Y); el toque acerca la punta
+    tent_to("T7_BrazoDer", TENT_DOWN["T7_BrazoDer"].lerp(pos, reach))   # v011: marca con la mano derecha
     PB["Cabeza"].rotation_euler.z = D(14) * reach; PB["Cabeza"].rotation_euler.x = D(4) * reach
-    set_world_loc(PB["Mirada"], Vector((0, -0.55, ez)).lerp(CHECK + Vector((0, -0.35, 0.02)), reach))
+    set_world_loc(PB["Mirada"], Vector((0, -0.55, ez)).lerp(ck + Vector((0, -0.35, 0.02)), reach))
     lids(15 * reach, 15 * reach)
     if f >= 26: g = smooth((f - 26) / 6.0); KEYS["Risa"].value = 0.35 * g; brow("I", 0.008 * g); brow("D", 0.008 * g); show("Dientes")
     if 30 <= f <= 42: lids(180, 180); show("OjoFeliz_I", "OjoFeliz_D")
@@ -893,7 +921,7 @@ sc.render.resolution_x = 800; sc.render.resolution_y = 1000; sc.render.resolutio
 HEAD = [head, bpy.data.objects["Parpado_I"], bpy.data.objects["Parpado_D"]]
 BODY = [body] + list(tent_meshes.values())
 SKIN = HEAD + BODY
-HOODIE = [bpy.data.objects[n] for n in ("Sudadera", "Sudadera_Cuello", "Sudadera_Capucha", "Sudadera_Bajo", "Sudadera_Bolsillo")]
+HOODIE = [bpy.data.objects[n] for n in ("Sudadera", "Sudadera_Cuello", "Sudadera_Capucha", "Sudadera_Bajo", "Sudadera_Bolsillo")] + list(sleeves.values())
 def _unwrap(objs, margin=0.004):
     bpy.ops.object.select_all(action='DESELECT')
     for o in objs: o.select_set(True)
@@ -964,6 +992,13 @@ def bake_finish():
     sc.render.engine = 'BLENDER_EEVEE'; print("materiales horneados asignados")
 def bake_all():
     bake_head(); bake_body(); bake_hoodie(); bake_finish()
+def reuse_head(src_dir):
+    """v011: la cabeza no cambia; se desenvuelve igual y se cargan sus texturas. Cuerpo (brazos nuevos) y sudadera (mangas) se hornean de nuevo."""
+    _unwrap(HEAD, margin=0.006)
+    def load(fn, color):
+        img = bpy.data.images.load(os.path.join(src_dir, fn)); img.name = fn.replace(".png", "")
+        img.colorspace_settings.name = 'sRGB' if color else 'Non-Color'; return img
+    BAKED["cabeza"] = (load("cabeza_color.png", True), load("cabeza_normal.png", False)); print("cabeza reutilizada de", src_dir)
 def bake_reuse(src_dir):
     """mismo desenvuelto que el horneado (determinista para la misma geometría) y texturas ya horneadas de otra versión"""
     _unwrap(HEAD, margin=0.006); _unwrap(BODY, margin=0.004); _unwrap(HOODIE, margin=0.006)
@@ -980,4 +1015,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v011 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v011 (brazos) OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))

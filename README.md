@@ -9,7 +9,7 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 | Parte | Estado | Origen |
 |---|---|---|
 | Personalidad y características | Definidas el 2026-11-06 (`personaje/FICHA.md`) | Aspecto: Modelador 3D · Personalidad: Quantic |
-| Modelo 3D | Entregado el 2026-11-06, versión v011 (v010 aprobada + encuadre de expresiones, tentáculos relajados y un solo `.glb`); notas en `modelo/NOTAS.md` | Modelador 3D |
+| Modelo 3D | Entregado el 2026-11-06, versión v011 (v010 aprobada + encuadre de expresiones, dos tentáculos como brazos por las mangas, tentáculos relajados y un solo `.glb`); notas en `modelo/NOTAS.md` | Modelador 3D |
 
 ## Estructura
 
