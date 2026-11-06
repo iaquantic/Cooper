@@ -3,37 +3,53 @@
 Cooper es el pulpo, la mascota de Quantic. Esta ficha reúne lo que el Modelador 3D tiene de él a
 2026-11-06, tras nueve versiones del modelo (`modelo/NOTAS.md` es la nota de la versión entregada, v009).
 
-**Qué es dato y qué es propuesta.** La fuente de Cooper es una hoja de personaje raster (cuatro vistas de
-cuerpo entero y seis expresiones) más una tabla de identidad con colores y accesorios. De ahí salen el
-aspecto, los colores y las expresiones. **Quantic no ha entregado todavía personalidad, tono, voz ni guía
-de marca**; lo que aparece en esos apartados es una **propuesta deducida de la hoja** (postura, accesorios y
-gestos) y está marcado como tal. Hay que validarla antes de usarla como canon.
+**Qué es dato y qué decidió Quantic.** El aspecto, los colores y las expresiones salen de la hoja de
+personaje raster (cuatro vistas de cuerpo entero y seis expresiones) y de la tabla de identidad. La
+personalidad, el tono y las reglas de uso los definió Quantic el 2026-11-06 a partir de la propuesta del
+Modelador 3D.
 
 ## Identidad
 - **Nombre:** Cooper
 - **Especie:** pulpo (8 tentáculos)
 - **Rol:** mascota de Quantic. Sale en publicaciones, animaciones y dentro de otros proyectos.
-- **Resumen en una frase (propuesta):** un pulpo curioso y multitarea que, con sus ocho tentáculos, lleva a
-  la vez el portátil, el móvil, el café y la lista de tareas mientras se le enciende la bombilla.
+- **Resumen en una frase:** un pulpo del equipo de Quantic, curioso y divertido, que en cada momento usa
+  el tentáculo que toca: la bombilla para las ideas, el portátil para trabajar, el café para relajarse y
+  la checklist para organizar.
 
-## Personalidad (propuesta, pendiente de validar por Quantic)
-- **Rasgos principales:** entusiasta y curioso (bombilla encendida, ojos muy abiertos), organizado y
-  multitarea (checklist, panel de datos, laptop), cercano y amable (sonrisa abierta, guiño), con un punto
-  de ingenio relajado (sudadera con capucha y taza de café).
-- **Cómo habla (tono y voz):** cercano, claro y optimista; explica cosas técnicas sin jerga y celebra los
-  avances. Sin voz definida: el modelo no incluye audio.
-- **Frases o gestos típicos:** levantar un tentáculo con la bombilla cuando tiene una idea; saludar con un
-  tentáculo; teclear en el laptop mirando la pantalla; sostener la taza; marcar tareas en la checklist.
-  (Los cuatro primeros existen como clips de animación; ver "Expresiones y poses".)
-- **Lo que Cooper nunca hace (reglas de uso, propuesta):**
-  - Nunca cambia de colores ni pierde las gafas, la sudadera con el logo o las ventosas rosas: son lo que
-    lo hace reconocible.
-  - Nunca aparece con menos de ocho tentáculos ni con tentáculos amenazantes; se usan para sostener,
-    señalar y saludar.
-  - Nunca es agresivo, sarcástico ni burlón; sus expresiones van de serio a risa, sin enfado.
-  - Nunca se redibuja ni se regenera con IA en cada proyecto: siempre se parte de este modelo
-    (regla del repositorio).
-  - No lleva textos ni logos que no sean el de Quantic.
+## Personalidad
+
+### Rasgos
+Cooper es **curioso y entusiasta**, **organizado y multitarea**, **cercano y amable** e **ingenioso y
+relajado**. No muestra los cuatro a la vez: **cada situación saca uno**, con su accesorio.
+
+### Modos según la situación
+Cooper aparece con **un solo accesorio protagonista**, el del modo que toca. El resto de accesorios se
+ocultan (cada uno es un objeto aparte en el modelo).
+
+| Modo | Cuándo | Rasgo | Accesorio | Animación |
+|---|---|---|---|---|
+| **Idea** | Lluvias de ideas, lanzamientos, propuestas nuevas | Curioso y entusiasta | Bombilla que se enciende | `Idea` |
+| **Trabajo** | Desarrollo, automatizaciones, «estamos en ello» | Organizado y multitarea | Portátil | `Tecleo` |
+| **Relax** | Pausas, viernes, mensajes informales, celebraciones tranquilas | Ingenioso y relajado | Taza de café | `Idle` |
+| **Organizar y datos** | Resultados, planificación, reportes, avances | Organizado y multitarea | Checklist, panel de datos o móvil | — |
+
+En todos los modos es **cercano y amable**. Para saludar o presentarse usa la animación `Saludo`.
+
+### Cómo habla
+- **Tono:** cercano, claro y divertido. Tutea, explica lo técnico sin jerga y celebra los avances.
+- **Humor:** por encima de la media. Bromea a menudo, pero el mensaje se entiende igual sin la broma.
+- **Persona:** habla en **primera persona, como parte del equipo**: «en Quantic hemos…», «te ayudo a…».
+- **Saludo:** sin frase fija. Saluda distinto cada vez, según el contexto.
+- **Emojis:** no usa. La expresividad la ponen el modelo y las animaciones.
+- **Voz:** sin voz definida; el modelo no incluye audio.
+
+### Lo que Cooper nunca hace
+- **Cambiar su aspecto:** nunca cambia de colores ni pierde las gafas, la sudadera con el logo o las
+  ventosas rosas. Siempre tiene ocho tentáculos.
+- **Ser agresivo o burlón:** su humor nunca va contra nadie. Nada de sarcasmo, burla ni enfado; sus
+  expresiones van de serio a risa.
+- **Regenerarse con IA:** nunca se redibuja ni se regenera en cada proyecto; siempre se parte del modelo
+  de este repositorio.
 
 ## Aspecto
 
@@ -104,8 +120,9 @@ En el `.glb` y el `.fbx` van como animaciones; en el `.blend` como pistas NLA.
 Renders con fondo transparente en `modelo/renders/`: frontal, tres cuartos y las siete expresiones.
 
 ## Uso
-- **Publicaciones:** usar los PNG de `modelo/renders/` (1600 × 2000, fondo transparente). Para una pose o
-  expresión nueva se renderiza desde el `.blend`.
+- **Publicaciones:** elegir primero el modo según la situación y usar el render de ese modo. Los PNG
+  actuales de `modelo/renders/` (1600 × 2000, fondo transparente) muestran todos los accesorios a la vez;
+  los renders por modo están pendientes. Para una pose o expresión nueva se renderiza desde el `.blend`.
 - **Animaciones:** `modelo/animacion/cooper_v009_rig.fbx` o el `.glb` con rig. Esqueleto de 49 huesos:
   raíz, cuerpo, cabeza, mirada (los ojos la siguen), párpados, cejas, ojos felices, dientes, marcas,
   bombilla encendida/apagada y ocho cadenas de tentáculo con control IK en la punta; boca con shape keys
@@ -115,4 +132,5 @@ Renders con fondo transparente en `modelo/renders/`: frontal, tres cuartos y las
 
 ## Pendiente
 - Confirmar los hex oficiales con la guía de marca de Quantic y, si difieren, rehornear.
-- Validar personalidad, tono y reglas de uso propuestas.
+- Renders y animaciones por modo (Idea, Trabajo, Relax, Organizar y datos) con un solo accesorio
+  visible. Las animaciones y renders actuales muestran todos los accesorios a la vez.
