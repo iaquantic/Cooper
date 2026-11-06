@@ -1,4 +1,8 @@
-# Cooper (mascota Quantic) — construcción v011 (Blender 5.2, ejecutar dentro de Blender)
+# Cooper (mascota Quantic) — construcción v012 (Blender 5.2, ejecutar dentro de Blender)
+# v012 (dos arreglos de alcance de los brazos, revisión de Quantic de la v011): en Relax el borde de la taza toca
+# la boca, con la taza inclinada hacia ella (objetivo resuelto midiendo la taza evaluada, cabeza 5° hacia la taza);
+# en la expresión 3 pensativo la punta del brazo izquierdo se apoya bajo la barbilla (punto calculado sobre la
+# superficie de la cabeza). Nada más cambia respecto a v011; texturas reutilizadas con bake_reuse(v011/texturas).
 # v011 (ajustes tras aprobar v010): encuadre del busto más bajo y común a las siete expresiones (las rayitas
 # de énfasis entran enteras), y T2 (portátil), T3 (taza) y T6 (checklist) relajados junto a la sudadera
 # siempre que su accesorio no se usa; cada uno sube solo en su clip (Tecleo, Relax, Organizar).
@@ -17,7 +21,7 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v011"
+BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v012"
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -702,6 +706,28 @@ TENT_DOWN = {"T1_Bombilla": T1_DOWN,
              "T6_Checklist": Vector((0.21, -0.35, 0.06))}   # checklist: al suelo, delante-derecha
 idle_rest = dict(tip_rest); idle_rest.update(TENT_DOWN)
 def tent_to(tn, world): set_world_loc(PB[ik_targets[tn]], world)
+def world_of(name):
+    """posición mundial de un objeto con el rig evaluado (huesos IK y parentesco a hueso incluidos)"""
+    vl.update(); dg = bpy.context.evaluated_depsgraph_get()
+    return bpy.data.objects[name].evaluated_get(dg).matrix_world.translation.copy()
+def reach_object(tn, obj_name, goal, start, iters=6):
+    """mueve el control IK de tn hasta que el objeto obj_name (colgado de la mano) queda en goal; devuelve el objetivo del control"""
+    target = Vector(start)
+    for _ in range(iters):
+        tent_to(tn, target); err = goal - world_of(obj_name)
+        if err.length < 0.0015: break
+        target = target + err
+    return target
+def aim_bone_axis(pb, obj_bottom, obj_top, up_world, iters=3):
+    """gira el hueso pb (rotación XYZ local) para que el eje obj_bottom→obj_top apunte a up_world (mundo)"""
+    for _ in range(iters):
+        vl.update(); axis = (world_of(obj_top) - world_of(obj_bottom)).normalized()
+        q = axis.rotation_difference(Vector(up_world).normalized())
+        if q.angle < 0.01: break
+        M = (arm.matrix_world @ pb.matrix).to_3x3()
+        R_local = M.inverted() @ q.to_matrix() @ M
+        pb.rotation_euler = (pb.rotation_euler.to_matrix() @ R_local).to_euler('XYZ')   # giro añadido en el espacio local del hueso
+    return pb.rotation_euler.copy()
 BROW_R = arm.data.bones["Ceja_I"].length
 def brow(side, dz=0.0, tilt=0.0):
     """ceja: subir/bajar dz (m, aprox.) girando el hueso sobre el centro de la cabeza, e inclinar tilt (grados)"""
@@ -716,7 +742,14 @@ reset(); show("Marcas"); brow("I", 0.018); brow("D", 0.018); KEYS["O"].value = 1
 # 3 pensativo: mirada arriba-izquierda, ceja I arriba, ceja D abajo, puchero, tentáculo D en la barbilla
 reset(); lids(40, 40); set_world_loc(PB["Mirada"], (-0.25, -0.55, ez + 0.22))
 brow("I", 0.012, 12); brow("D", -0.005, -6); KEYS["Puchero"].value = 1.0; PB["Cabeza"].rotation_euler.z = D(8)
-tent_to("T2_BrazoIzq", (-0.06, -0.235, 0.46)); key_all(3)   # v011: la mano izquierda va a la barbilla
+def chin_point(d_local=(-0.12, -0.70, -0.70), out=0.014):
+    """punto bajo la barbilla: intersección de la dirección d_local con el elipsoide de la cabeza (evaluada), más el radio de la mano"""
+    vl.update(); dg = bpy.context.evaluated_depsgraph_get(); M = head.evaluated_get(dg).matrix_world
+    bb = head.bound_box; rx, ry, rz = [(bb[6][i] - bb[0][i]) / 2 for i in range(3)]
+    d = Vector(d_local).normalized(); t = 1.0 / math.sqrt((d.x / rx) ** 2 + (d.y / ry) ** 2 + (d.z / rz) ** 2)
+    p = M @ (d * t); n = (M.to_3x3() @ d).normalized()
+    return p + n * out
+tent_to("T2_BrazoIzq", chin_point()); key_all(3)   # v012: la punta del brazo izquierdo apoyada bajo la barbilla (v011 quedaba delante del pecho)
 # 4 guiñando: ojo I cerrado, ceja I bajada, sonrisa
 reset(); lids(180, 0); show("OjoFeliz_I"); brow("I", -0.008, -10); brow("D", 0.010); PB["Cabeza"].rotation_euler.z = D(-6); key_all(4)
 # 5 serio: párpados a medio cerrar, cejas bajas e inclinadas, boca plana, tentáculos cruzados
@@ -858,16 +891,29 @@ def k_tecleo(f, u):
 MOUTH = bpy.data.objects["Boca"].matrix_world.translation.copy()
 CHECK = bpy.data.objects["Checklist_Hoja"].matrix_world.translation.copy()
 def smooth(x): x = min(1.0, max(0.0, x)); return x * x * (3 - 2 * x)
+HEAD_SIP = D(5)                                   # v012: la cabeza se inclina un poco hacia la taza (+x = mirar abajo, como en Tecleo)
+MUG_UP = Vector((0.08, 0.42, 0.90))               # eje de la taza en el sorbo: inclinada hacia la boca (+Y), casi vertical
+def solve_sip():
+    """v012: calcula el objetivo del control IK de T7 y el giro de Acc_Taza para que el borde de la taza toque los labios"""
+    reset(); mode("Acc_Taza"); PB["Cabeza"].rotation_euler.x = HEAD_SIP; vl.update()
+    lips = world_of("Boca"); goal = lips + Vector((-0.004, -0.036, -0.010))   # centro del borde: 3,6 cm delante de los labios → el borde trasero los toca
+    target = MOUTH + Vector((-0.02, -0.05, -0.055)); rot = None
+    for _ in range(3):
+        rot = aim_bone_axis(PB["Acc_Taza"], "Taza_Cuerpo", "Taza_Cafe", MUG_UP)
+        target = reach_object("T7_BrazoDer", "Taza_Cafe", goal, target)
+    rim = world_of("Taza_Cafe"); print("sorbo: labios", [round(v, 3) for v in lips], "borde taza", [round(v, 3) for v in rim], "error %.3f" % (goal - rim).length)
+    reset(); return target, rot
+SIP_TARGET, SIP_ROT = solve_sip()
 def k_relax(f, u):
-    """bucle tranquilo: la mano derecha (T7) sube la taza a la boca, sorbo con ojos cerrados, baja y sonríe; solo la taza"""
+    """bucle tranquilo: la mano derecha (T7) sube la taza hasta la boca (el borde toca los labios), sorbo con ojos cerrados, baja y sonríe; solo la taza"""
     mode("Acc_Taza")
     if f <= 18: s = smooth(f / 18.0)
     elif f <= 42: s = 1.0
     elif f <= 60: s = smooth(1 - (f - 42) / 18.0)
     else: s = 0.0
-    sip = MOUTH + Vector((-0.02, -0.05, -0.055))                # mano derecha: la taza queda delante de los labios
-    tent_to("T7_BrazoDer", TENT_DOWN["T7_BrazoDer"].lerp(sip, s))
-    PB["Cabeza"].rotation_euler.x = D(-7) * s; PB["Root"].location.z = 0.004 * math.sin(2 * math.pi * f / 72.0)
+    tent_to("T7_BrazoDer", TENT_DOWN["T7_BrazoDer"].lerp(SIP_TARGET, s))   # v012: objetivo resuelto con la taza evaluada
+    PB["Acc_Taza"].rotation_euler = tuple(a * s for a in SIP_ROT)          # la taza se inclina hacia la boca al llegar
+    PB["Cabeza"].rotation_euler.x = HEAD_SIP * s; PB["Root"].location.z = 0.004 * math.sin(2 * math.pi * f / 72.0)
     brow("I", 0.004 * s); brow("D", 0.004 * s)
     if 22 <= f <= 40: lids(180, 180); show("OjoFeliz_I", "OjoFeliz_D"); KEYS["O"].value = 0.5
     else: lids(18 * s, 18 * s)
@@ -1015,4 +1061,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v011 (brazos) OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v012 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
