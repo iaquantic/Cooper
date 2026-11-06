@@ -648,7 +648,7 @@ def reset():
         pb.location = (0, 0, 0); pb.rotation_euler = (0, 0, 0); pb.scale = (0.001, 0.001, 0.001) if pb.name in VIS else (1, 1, 1)
     for k in KEYS: k.value = 0.0
     vl.update()
-    tent_to("T1_Bombilla", T1_DOWN); vl.update()   # v010: sin bombilla, el tentáculo T1 no se queda en alto (Idea lo sube)
+    tent_to("T1_Bombilla", T1_DOWN); tent_to("T7_Movil", T7_DOWN); vl.update()   # v010: T1 y T7 relajados cuando no sostienen nada (Idea sube T1)
 def show(*names):
     for n in names: PB[n].scale = (1, 1, 1)
 def hide(*names):
@@ -666,7 +666,8 @@ def mode(*visible):
 D = math.radians
 tip_rest = {tn: (arm.matrix_world @ arm.data.bones[ik_targets[tn]].head_local).copy() for tn in TENT}
 T1_DOWN = Vector((-0.34, 0.06, 0.40))                      # T1 relajado junto a la sudadera (fuera del encuadre del busto) cuando no sostiene la bombilla
-idle_rest = dict(tip_rest); idle_rest["T1_Bombilla"] = T1_DOWN
+T7_DOWN = Vector((0.34, 0.06, 0.40))                       # T7 (móvil) relajado en el lado contrario; ningún clip usa el móvil
+idle_rest = dict(tip_rest); idle_rest["T1_Bombilla"] = T1_DOWN; idle_rest["T7_Movil"] = T7_DOWN
 def tent_to(tn, world): set_world_loc(PB[ik_targets[tn]], world)
 BROW_R = arm.data.bones["Ceja_I"].length
 def brow(side, dz=0.0, tilt=0.0):

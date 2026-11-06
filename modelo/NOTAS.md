@@ -62,7 +62,8 @@ estado de reposo exportado los seis están visibles (escala 1) y es el código e
 - El tentáculo T1, que en v009 estaba siempre en alto sosteniendo la bombilla, **se relaja junto a la
   sudadera** siempre que la bombilla no se usa (reposo, `Expresiones`, `Idle`, `Saludo`, `Tecleo`,
   `Relax`, `Organizar`). En `Idea` sube la bombilla desde esa posición y se enciende con un bote.
-  Así no queda un tentáculo levantado "sosteniendo nada" y ya no asoma por el borde de los bustos.
+  Lo mismo hace T7 (el del móvil), en el lado contrario, porque ningún clip usa el móvil. Así no queda
+  un tentáculo levantado "sosteniendo nada" y ya no asoma nada por los bordes de los bustos.
 
 ### 4. Renders (fondo transparente, 1600 × 2000)
 `modelo/renders/modos/`: `cooper_idea_frente.png` y `cooper_idea_tres_cuartos.png` (fotograma 36 de
@@ -81,8 +82,10 @@ accesorios), `comparacion_expresiones.png` (fila de expresiones de la hoja frent
 - En `personaje/FICHA.md`, la tabla de modos dentro de "Personalidad" asigna `Idle` a Relax y ninguna
   animación a Organizar; con v010 corresponden `Relax` y `Organizar`. No se ha tocado porque ese
   apartado es de Quantic.
-- Los tentáculos que sostienen un accesorio oculto conservan la pose de sostenerlo (salvo T1). Si en
-  algún modo molesta, se puede relajar igual que T1.
+- Los tentáculos T2 (portátil), T3 (taza) y T6 (checklist) conservan la pose de sostener su accesorio
+  aunque esté oculto (T1 y T7 ya se relajan). Si en algún modo molesta, se relajan igual.
+- Si un proyecto muestra `Acc_Movil` por código durante `Idle` o `Expresiones`, el móvil aparece en la
+  posición relajada de T7, junto a la sudadera, no en alto como en la hoja.
 - El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia la animación `Idea`; en reposo está
   encendida.
 
@@ -91,7 +94,7 @@ accesorios), `comparacion_expresiones.png` (fila de expresiones de la hoja frent
   real; la altura de 1,000 m es decisión nuestra y el grosor de cada pieza se dedujo de las vistas.
 - Las poses de `Relax` y `Organizar` (altura de la taza, punto donde se marca la tarea, ritmo) son una
   propuesta del Modelador 3D; la hoja no las muestra.
-- La posición relajada de T1 junto a la sudadera es también una propuesta.
+- Las posiciones relajadas de T1 y T7 junto a la sudadera son también una propuesta.
 - Los contenidos de pantallas, taza y checklist son textos de ejemplo.
 
 ## Medidas (sin cambios)
