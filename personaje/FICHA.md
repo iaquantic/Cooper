@@ -24,14 +24,15 @@ relajado**. No muestra los cuatro a la vez: **cada situación saca uno**, con su
 
 ### Modos según la situación
 Cooper aparece con **un solo accesorio protagonista**, el del modo que toca. El resto de accesorios se
-ocultan (cada uno es un objeto aparte en el modelo).
+ocultan. Cada accesorio tiene un nombre fijo en el modelo (`Acc_*`) y la animación de cada modo ya deja
+visible solo el suyo.
 
 | Modo | Cuándo | Rasgo | Accesorio | Animación |
 |---|---|---|---|---|
 | **Idea** | Lluvias de ideas, lanzamientos, propuestas nuevas | Curioso y entusiasta | Bombilla que se enciende | `Idea` |
 | **Trabajo** | Desarrollo, automatizaciones, «estamos en ello» | Organizado y multitarea | Portátil | `Tecleo` |
-| **Relax** | Pausas, viernes, mensajes informales, celebraciones tranquilas | Ingenioso y relajado | Taza de café | `Idle` |
-| **Organizar y datos** | Resultados, planificación, reportes, avances | Organizado y multitarea | Checklist, panel de datos o móvil | — |
+| **Relax** | Pausas, viernes, mensajes informales, celebraciones tranquilas | Ingenioso y relajado | Taza de café | `Relax` |
+| **Organizar y datos** | Resultados, planificación, reportes, avances | Organizado y multitarea | Checklist y panel de datos (o móvil) | `Organizar` |
 
 En todos los modos es **cercano y amable**. Para saludar o presentarse usa la animación `Saludo`.
 
@@ -143,5 +144,3 @@ de frente y de tres cuartos; sin accesorios; saludando) y `expresiones/` (las si
 
 ## Pendiente
 - Confirmar los hex oficiales con la guía de marca de Quantic y, si difieren, rehornear.
-- Revisar la tabla de modos de "Personalidad": con v010, a Relax le corresponde la animación `Relax`
-  y a Organizar y datos, `Organizar`.

@@ -79,9 +79,8 @@ accesorios), `comparacion_expresiones.png` (fila de expresiones de la hoja frent
 
 ## Pendiente
 - Confirmar los hex oficiales con la guía de marca de Quantic y, si difieren, rehornear las texturas.
-- En `personaje/FICHA.md`, la tabla de modos dentro de "Personalidad" asigna `Idle` a Relax y ninguna
-  animación a Organizar; con v010 corresponden `Relax` y `Organizar`. No se ha tocado porque ese
-  apartado es de Quantic.
+- Las rayitas de énfasis de `cooper_expresion_2_sorprendido.png` y `cooper_expresion_6_risa.png` quedan
+  cortadas por el borde superior; hay que bajar el encuadre en esos dos renders.
 - Los tentáculos T2 (portátil), T3 (taza) y T6 (checklist) conservan la pose de sostener su accesorio
   aunque esté oculto (T1 y T7 ya se relajan). Si en algún modo molesta, se relajan igual.
 - Si un proyecto muestra `Acc_Movil` por código durante `Idle` o `Expresiones`, el móvil aparece en la
