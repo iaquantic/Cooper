@@ -8,8 +8,8 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 
 | Parte | Estado | Origen |
 |---|---|---|
-| Personalidad y características | Pendiente | Modelador 3D |
-| Modelo 3D | Pendiente | Modelador 3D |
+| Personalidad y características | Entregado el 2026-11-06 (`personaje/FICHA.md`); personalidad y tono son propuesta pendiente de validar | Modelador 3D |
+| Modelo 3D | Entregado el 2026-11-06, versión v009 (`modelo/`, notas en `modelo/NOTAS.md`) | Modelador 3D |
 
 ## Estructura
 
@@ -21,6 +21,7 @@ modelo/
   web/              Modelo para web y proyectos en tiempo real (.glb)
   animacion/        Versión con esqueleto para animar (.fbx / .glb con rig)
   renders/          Imágenes de Cooper con fondo transparente (.png)
+  NOTAS.md          Notas de la versión entregada (v009)
 SOLICITUD-MODELADOR-3D.md   Pedido al Modelador 3D
 ```
 
