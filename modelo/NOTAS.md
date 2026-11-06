@@ -107,8 +107,10 @@ y teclas: iguales.
 
 ## Pendiente
 - Confirmar los hex oficiales con la guía de marca de Quantic y, si difieren, rehornear las texturas.
-- En `personaje/FICHA.md`, la tabla de modos dentro de "Personalidad" sigue asignando `Idle` a Relax y
-  ninguna animación a Organizar; corresponden `Relax` y `Organizar`. No se toca por ser apartado de Quantic.
+- En `Relax` la taza no llega a la boca: el sorbo se queda a la altura del pecho, por debajo de la boca.
+  En v010, con el tentáculo de abajo, sí llegaba. Revisión de Quantic.
+- En la expresión `3 pensativo` la mano queda separada de la cara, delante del pecho; en la hoja toca
+  la barbilla. Revisión de Quantic.
 - El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia `Idea`; en reposo está encendida.
 - Las mangas nacen dentro del cuerpo de la sudadera; si un brazo se lleva muy atrás por código, la manga
   puede asomar por la espalda. Los clips entregados no lo hacen.
