@@ -46,7 +46,8 @@ En todos los modos es **cercano y amable**. Para saludar o presentarse usa la an
 
 ### Lo que Cooper nunca hace
 - **Cambiar su aspecto:** nunca cambia de colores ni pierde las gafas, la sudadera con el logo o las
-  ventosas rosas. Siempre tiene ocho tentáculos.
+  ventosas rosas. Siempre tiene ocho tentáculos: dos salen por las mangas de la sudadera como brazos
+  y seis quedan abajo (decisión de Quantic del 2026-11-06, a partir de v011).
 - **Ser agresivo o burlón:** su humor nunca va contra nadie. Nada de sarcasmo, burla ni enfado; sus
   expresiones van de serio a risa.
 - **Regenerarse con IA:** nunca se redibuja ni se regenera en cada proyecto; siempre se parte del modelo
