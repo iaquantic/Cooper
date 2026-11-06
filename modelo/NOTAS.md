@@ -1,101 +1,67 @@
-# Cooper v010 — notas de la versión
+# Cooper v011 — notas de la versión
 
-**Fecha:** 2026-11-06 · **Parte de:** v009 · **Pedido:** Quantic, "modos con un solo accesorio"
-(`SOLICITUD-MODELADOR-3D.md` del repositorio).
+**Fecha:** 2026-11-06 · **Parte de:** v010 (aprobada) · **Pedido:** Quantic, tres ajustes tras revisar la v010.
 
 Archivos de esta versión en el repositorio `iaquantic/Cooper`:
 
 | Archivo | Qué es |
 |---|---|
-| `modelo/blend/cooper_v010.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
-| `modelo/blend/build_v010.py` | Script que reconstruye Cooper desde cero; `bake_reuse(dir)` carga las texturas ya horneadas. |
-| `modelo/web/cooper_v010.glb` | Para web y tiempo real: escala 1, Y arriba, texturas y las 7 animaciones. |
-| `modelo/animacion/cooper_v010_rig.fbx` y `cooper_v010_rig.glb` | Con esqueleto (55 huesos), shape keys de la boca y las 7 animaciones. |
+| `modelo/blend/cooper_v011.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
+| `modelo/blend/build_v011.py` | Script que reconstruye Cooper desde cero; `bake_reuse(dir)` carga las texturas ya horneadas. |
+| `modelo/web/cooper_v011.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas, esqueleto de 55 huesos, shape keys y las 7 animaciones. |
+| `modelo/animacion/cooper_v011_rig.fbx` | Versión FBX con esqueleto, shape keys, texturas incrustadas y las 7 animaciones. |
 | `modelo/renders/modos/` | PNG 1600 × 2000 con fondo transparente, un accesorio por modo. |
-| `modelo/renders/expresiones/` | Las siete expresiones, sin accesorios a la vista. |
+| `modelo/renders/expresiones/` | Las siete expresiones, sin accesorios, con el mismo encuadre. |
 | `modelo/renders/comparacion/` | Comparaciones con la hoja de personaje. |
 
-Colores, proporciones y rasgos: **iguales que en v009**; siguen pendientes los hex de la guía de marca.
+Colores, proporciones, rasgos, nombres de accesorio (`Acc_*`) y visibilidad por modo: **iguales que en v010**.
 
-## Qué cambió respecto a v009
+## Qué cambió respecto a v010
 
-### 1. Accesorios con nombre fijo, visibles u ocultos por modo
-Cada accesorio cuelga de un **hueso de visibilidad con nombre fijo**. En el `.glb` y el `.fbx` ese hueso
-es un nodo con ese nombre y todas las mallas del accesorio están debajo de él, así que basta con
-ocultar el nodo (`scene.getObjectByName('Acc_Taza').visible = false` en three.js, o el equivalente del
-motor que se use). En Blender, además, cada accesorio tiene su **colección** con el mismo nombre dentro
-de `Accesorios`, y el hueso se puede ocultar escalándolo a 0,001.
+### 1. Encuadre de las expresiones
+La cámara de busto (`Cam_Busto`) sube su centro 3,5 cm y amplía el encuadre de 0,62 a 0,70 m de alto, de
+modo que las rayitas de énfasis de `cooper_expresion_2_sorprendido.png` y `cooper_expresion_6_risa.png`
+entran enteras con margen. **Las siete expresiones usan este mismo encuadre**, así que la serie es
+coherente (todas se han vuelto a renderizar).
 
-| Nombre fijo (nodo / hueso / colección) | Accesorio | Cuelga de |
-|---|---|---|
-| `Acc_Bombilla` | Bombilla con casquillo, rosca y dos estados: `Luz` (encendida, con rayos) y `LuzOff` (apagada), que son hijos suyos | punta del tentáculo T1 |
-| `Acc_Laptop` | Portátil: base, tapa con logo Q, pantalla con imagen, bisagra, teclado con letras, trackpad | punta del tentáculo T2 |
-| `Acc_Movil` | Móvil con pantalla, cámara y barra | punta del tentáculo T7 |
-| `Acc_Taza` | Taza "Q Quantic" con café y asa | punta del tentáculo T3 |
-| `Acc_Checklist` | Checklist: tabla, hoja "Tareas de hoy" y clip | punta del tentáculo T6 |
-| `Acc_Panel` | Panel de datos flotante con marco, barras y flecha | hueso `Panel` (junto al cuerpo) |
+### 2. Tentáculos relajados cuando su accesorio no se usa
+Igual que ya hacían T1 (bombilla) y T7 (móvil) en v010, ahora **T2 (portátil), T3 (taza) y T6
+(checklist) descansan en el suelo** mientras no se usa su accesorio, y **cada uno sube solo en su clip**:
 
-**Qué va visible en cada modo**
-
-| Modo | Visible | Oculto | Animación |
+| Tentáculo | Accesorio | Posición relajada | Sube en |
 |---|---|---|---|
-| Idea | `Acc_Bombilla` | el resto | `Idea` |
-| Trabajo | `Acc_Laptop` | el resto | `Tecleo` |
-| Relax | `Acc_Taza` | el resto | `Relax` (nueva) |
-| Organizar y datos | `Acc_Checklist` y `Acc_Panel` (el móvil, `Acc_Movil`, queda disponible por nombre si encaja mejor) | el resto | `Organizar` (nueva) |
-| Sin accesorios (saludo, presentación) | ninguno | todos | `Saludo` |
+| T1 | bombilla | junto a la sudadera, lado izquierdo | `Idea` |
+| T2 | portátil | suelo, a la izquierda, por fuera del pie T4 | `Tecleo` (sube el portátil al empezar, lo baja al final) |
+| T3 | taza | suelo, delante-izquierda | `Relax` (sube la taza hasta la boca y la baja) |
+| T6 | checklist | suelo, delante-derecha | `Organizar` (sube la checklist al empezar, la baja al final) |
+| T7 | móvil | junto a la sudadera, lado derecho | ningún clip (el móvil se muestra solo por código) |
 
-Comportamiento en las animaciones: **los clips de modo (`Idea`, `Tecleo`, `Relax`, `Organizar`) y
-`Saludo` fijan la visibilidad** de los seis accesorios. **`Expresiones` e `Idle` no la tocan**, para que
-el proyecto decida qué accesorio muestra mientras Cooper está en reposo o hace una expresión. En el
-estado de reposo exportado los seis están visibles (escala 1) y es el código el que oculta.
+Revisados `Saludo`, `Idea`, `Idle` y `Expresiones` con los tentáculos bajados: se ven naturales (ocho
+tentáculos repartidos alrededor, ninguno "sosteniendo nada"). Renders regenerados: los de modo, los de sin
+accesorios y saludo, las siete expresiones y las comparaciones.
 
-### 2. Animaciones nuevas
-- **`Relax`** (72 fotogramas, 3 s, bucle): el tentáculo T3 sube la taza hasta la boca, Cooper da un
-  sorbo con los ojos cerrados y felices, baja la taza y sonríe relajado. Respiración suave de fondo.
-- **`Organizar`** (48 fotogramas, 2 s): mira la checklist que sostiene T6, el tentáculo delantero
-  derecho (T5) se acerca y toca la hoja para marcar una tarea, y Cooper sonríe con los ojos felices.
-  Checklist y panel visibles.
+Consecuencia para quien muestre un accesorio por código durante `Idle` o `Expresiones`: el accesorio
+aparece en la posición relajada de su tentáculo (en el suelo o junto a la sudadera), no en alto. Para verlo
+en alto hay que reproducir su clip de modo.
 
-### 3. Revisión de los clips existentes con un solo accesorio
-- `Idea`, `Tecleo` y `Saludo` ahora fijan la visibilidad (bombilla, portátil y ninguno).
-- El tentáculo T1, que en v009 estaba siempre en alto sosteniendo la bombilla, **se relaja junto a la
-  sudadera** siempre que la bombilla no se usa (reposo, `Expresiones`, `Idle`, `Saludo`, `Tecleo`,
-  `Relax`, `Organizar`). En `Idea` sube la bombilla desde esa posición y se enciende con un bote.
-  Lo mismo hace T7 (el del móvil), en el lado contrario, porque ningún clip usa el móvil. Así no queda
-  un tentáculo levantado "sosteniendo nada" y ya no asoma nada por los bordes de los bustos.
-
-### 4. Renders (fondo transparente, 1600 × 2000)
-`modelo/renders/modos/`: `cooper_idea_frente.png` y `cooper_idea_tres_cuartos.png` (fotograma 36 de
-`Idea`, bombilla encendida), `cooper_trabajo_*` (fotograma 24 de `Tecleo`), `cooper_relax_*`
-(fotograma 30 de `Relax`, en pleno sorbo), `cooper_organizar_*` (fotograma 32 de `Organizar`),
-`cooper_sin_accesorios_frente.png` (reposo sin accesorios) y `cooper_saludo_frente.png` /
-`cooper_saludo_tres_cuartos.png` (fotograma 24 de `Saludo`).
-`modelo/renders/expresiones/`: `cooper_expresion_0_neutro.png` … `cooper_expresion_6_risa.png`, sin
-ningún accesorio ni tentáculo asomando por los bordes.
-`modelo/renders/comparacion/`: `comparacion_frente.png` (hoja frente a v010 en reposo con todos los
-accesorios), `comparacion_expresiones.png` (fila de expresiones de la hoja frente a las de v010) y
-`comparacion_modos.png` (hoja frente a los cuatro modos).
+### 3. Un solo `.glb`
+`modelo/web/cooper_v011.glb` sustituye a `cooper_v010.glb` y a `cooper_v010_rig.glb`, que eran el mismo
+archivo. En `modelo/animacion/` queda solo `cooper_v011_rig.fbx`. Las rutas del apartado de uso de
+`personaje/FICHA.md` están actualizadas.
 
 ## Pendiente
 - Confirmar los hex oficiales con la guía de marca de Quantic y, si difieren, rehornear las texturas.
-- Las rayitas de énfasis de `cooper_expresion_2_sorprendido.png` y `cooper_expresion_6_risa.png` quedan
-  cortadas por el borde superior; hay que bajar el encuadre en esos dos renders.
-- Los tentáculos T2 (portátil), T3 (taza) y T6 (checklist) conservan la pose de sostener su accesorio
-  aunque esté oculto (T1 y T7 ya se relajan). Si en algún modo molesta, se relajan igual.
-- Si un proyecto muestra `Acc_Movil` por código durante `Idle` o `Expresiones`, el móvil aparece en la
-  posición relajada de T7, junto a la sudadera, no en alto como en la hoja.
-- El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia la animación `Idea`; en reposo está
-  encendida.
+- En `personaje/FICHA.md`, la tabla de modos dentro de "Personalidad" sigue asignando `Idle` a Relax y
+  ninguna animación a Organizar; corresponden `Relax` y `Organizar`. No se toca por ser apartado de Quantic.
+- El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia `Idea`; en reposo está encendida.
 
 ## Qué se infirió
-- Igual que en versiones anteriores: toda la geometría sale de una hoja de personaje raster, sin escala
+- Igual que en versiones anteriores: toda la geometría sale de una hoja de personaje raster sin escala
   real; la altura de 1,000 m es decisión nuestra y el grosor de cada pieza se dedujo de las vistas.
-- Las poses de `Relax` y `Organizar` (altura de la taza, punto donde se marca la tarea, ritmo) son una
-  propuesta del Modelador 3D; la hoja no las muestra.
-- Las posiciones relajadas de T1 y T7 junto a la sudadera son también una propuesta.
-- Los contenidos de pantallas, taza y checklist son textos de ejemplo.
+- Las posiciones relajadas de los cinco tentáculos con accesorio y el ritmo con que suben y bajan son una
+  propuesta del Modelador 3D; la hoja solo muestra la pose con todo en alto.
+- El encuadre del busto es una decisión de composición (margen de unos 5 cm sobre las rayitas).
 
 ## Medidas (sin cambios)
 Alto 1,000 m, ancho 0,92 m, fondo 0,64 m en reposo con todos los accesorios; topología 27 702 quads,
-1 532 triángulos y 63 n-gonos; 55 huesos (49 de v009 más los 6 `Acc_*`).
+1 532 triángulos y 63 n-gonos; 55 huesos.

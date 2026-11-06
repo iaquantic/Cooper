@@ -109,7 +109,7 @@ Laptop con logo Q en la tapa y pantalla con panel de control, móvil con asisten
 (apagada o encendida). Cada accesorio sigue al tentáculo que lo sostiene; se pueden ocultar por objeto.
 
 ## Expresiones y poses disponibles
-En el `.glb` y el `.fbx` van como animaciones; en el `.blend` como pistas NLA. Versión v010.
+En el `.glb` y el `.fbx` van como animaciones; en el `.blend` como pistas NLA. Versión v011.
 
 | Animación | Contenido | Accesorio visible |
 |---|---|---|
@@ -125,21 +125,23 @@ Accesorios con nombre fijo para mostrar u ocultar desde código: `Acc_Bombilla`,
 `Acc_Movil`, `Acc_Taza`, `Acc_Checklist`, `Acc_Panel` (nodo con ese nombre en el `.glb`/`.fbx`;
 colección y hueso con ese nombre en el `.blend`). Qué va visible en cada modo: `modelo/NOTAS.md`.
 
-Renders con fondo transparente (1600 × 2000) en `modelo/renders/`: `modos/` (un accesorio por modo,
-de frente y de tres cuartos; sin accesorios; saludando) y `expresiones/` (las siete, sin accesorios).
+Mientras un accesorio no se usa, su tentáculo descansa (en el suelo o junto a la sudadera) y solo sube en
+su clip de modo. Renders con fondo transparente (1600 × 2000) en `modelo/renders/`: `modos/` (un accesorio
+por modo, de frente y de tres cuartos; sin accesorios; saludando) y `expresiones/` (las siete, sin
+accesorios y con el mismo encuadre).
 
 ## Uso
 - **Publicaciones:** elegir primero el modo según la situación y usar el render de ese modo en
   `modelo/renders/modos/`: `cooper_idea_*`, `cooper_trabajo_*`, `cooper_relax_*`, `cooper_organizar_*`
   (de frente y de tres cuartos), `cooper_sin_accesorios_frente.png` y `cooper_saludo_*`. Las expresiones
   están en `modelo/renders/expresiones/`. Para una pose o expresión nueva se renderiza desde el `.blend`.
-- **Animaciones:** `modelo/animacion/cooper_v010_rig.fbx` o `cooper_v010_rig.glb`. Esqueleto de 55
-  huesos: raíz, cuerpo, cabeza, mirada (los ojos la siguen), párpados, cejas, ojos felices, dientes,
+- **Animaciones:** `modelo/animacion/cooper_v011_rig.fbx` (FBX) o el mismo `modelo/web/cooper_v011.glb`,
+  que ya lleva el esqueleto. Esqueleto de 55 huesos: raíz, cuerpo, cabeza, mirada (los ojos la siguen), párpados, cejas, ojos felices, dientes,
   marcas, bombilla encendida/apagada, seis huesos de accesorio `Acc_*` y ocho cadenas de tentáculo con
   control IK en la punta; boca con shape keys (O, plano, risa, puchero). Los siete clips vienen incluidos;
   los de modo fijan solos qué accesorio se ve.
-- **Dentro de proyectos:** `modelo/web/cooper_v010.glb` (escala 1, Y arriba, 15 MB con texturas y las
-  siete animaciones). Al cargarlo los seis accesorios están visibles: ocultar por nombre los que no
+- **Dentro de proyectos:** `modelo/web/cooper_v011.glb` (escala 1, Y arriba, 15 MB con texturas, esqueleto
+  y las siete animaciones; es el único `.glb`). Al cargarlo los seis accesorios están visibles: ocultar por nombre los que no
   toquen (`Acc_*`) o reproducir el clip del modo, que ya lo hace. Para pantallas con otro contenido,
   sustituir los PNG de pantalla y reexportar.
 

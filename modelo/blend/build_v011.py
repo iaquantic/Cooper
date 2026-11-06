@@ -1,4 +1,8 @@
-# Cooper (mascota Quantic) — construcción v010 (Blender 5.2, ejecutar dentro de Blender)
+# Cooper (mascota Quantic) — construcción v011 (Blender 5.2, ejecutar dentro de Blender)
+# v011 (ajustes tras aprobar v010): encuadre del busto más bajo y común a las siete expresiones (las rayitas
+# de énfasis entran enteras), y T2 (portátil), T3 (taza) y T6 (checklist) relajados junto a la sudadera
+# siempre que su accesorio no se usa; cada uno sube solo en su clip (Tecleo, Relax, Organizar).
+# Colores, proporciones, nombres Acc_* y visibilidad por modo: sin cambios.
 # Parte de build_v009.py. Pedido de Quantic/Leo del 2026-11-06: Cooper lleva un solo accesorio según el
 # modo. Cada accesorio cuelga de un hueso de visibilidad con nombre fijo (Acc_Bombilla, Acc_Laptop,
 # Acc_Movil, Acc_Taza, Acc_Checklist, Acc_Panel) y vive en una colección del mismo nombre; en el glTF ese
@@ -10,7 +14,7 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v010"
+BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v011"
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -648,7 +652,8 @@ def reset():
         pb.location = (0, 0, 0); pb.rotation_euler = (0, 0, 0); pb.scale = (0.001, 0.001, 0.001) if pb.name in VIS else (1, 1, 1)
     for k in KEYS: k.value = 0.0
     vl.update()
-    tent_to("T1_Bombilla", T1_DOWN); tent_to("T7_Movil", T7_DOWN); vl.update()   # v010: T1 y T7 relajados cuando no sostienen nada (Idea sube T1)
+    for tn, pos in TENT_DOWN.items(): tent_to(tn, pos)   # v011: todo tentáculo con accesorio se relaja hasta que su clip lo usa
+    vl.update()
 def show(*names):
     for n in names: PB[n].scale = (1, 1, 1)
 def hide(*names):
@@ -667,7 +672,12 @@ D = math.radians
 tip_rest = {tn: (arm.matrix_world @ arm.data.bones[ik_targets[tn]].head_local).copy() for tn in TENT}
 T1_DOWN = Vector((-0.34, 0.06, 0.40))                      # T1 relajado junto a la sudadera (fuera del encuadre del busto) cuando no sostiene la bombilla
 T7_DOWN = Vector((0.34, 0.06, 0.40))                       # T7 (móvil) relajado en el lado contrario; ningún clip usa el móvil
-idle_rest = dict(tip_rest); idle_rest["T1_Bombilla"] = T1_DOWN; idle_rest["T7_Movil"] = T7_DOWN
+# v011: posiciones relajadas de los tentáculos que sostienen accesorios (punta en el suelo o junto a la sudadera)
+TENT_DOWN = {"T1_Bombilla": T1_DOWN, "T7_Movil": T7_DOWN,
+             "T2_Laptop": Vector((-0.42, -0.08, 0.07)),     # al suelo, a la izquierda, por fuera del pie T4
+             "T3_Taza": Vector((-0.21, -0.35, 0.06)),       # al suelo, delante-izquierda, entre T4 y el centro
+             "T6_Checklist": Vector((0.21, -0.35, 0.06))}   # al suelo, delante-derecha, simétrico a T3
+idle_rest = dict(tip_rest); idle_rest.update(TENT_DOWN)
 def tent_to(tn, world): set_world_loc(PB[ik_targets[tn]], world)
 BROW_R = arm.data.bones["Ceja_I"].length
 def brow(side, dz=0.0, tilt=0.0):
@@ -810,7 +820,9 @@ def k_tecleo(f, u):
     """mira al laptop y teclea con T4 (pie izquierdo); parpadeo a mitad; solo el portátil"""
     mode("Acc_Laptop")
     tap = abs(math.sin(f / 48.0 * 2 * math.pi * 4))
-    reach = min(1.0, f / 6.0) * (1 - max(0.0, (f - 42) / 6.0))
+    lift = smooth(f / 10.0) * smooth(1 - (f - 40) / 8.0)
+    tent_to("T2_Laptop", TENT_DOWN["T2_Laptop"].lerp(tip_rest["T2_Laptop"], lift))   # v011: T2 sube el portátil solo aquí
+    reach = smooth((f - 6) / 8.0) * (1 - max(0.0, (f - 42) / 6.0))
     key_pos = LAPTOP + Vector((0.02 * math.sin(f / 48.0 * 2 * math.pi * 2), -0.02, 0.02 + 0.03 * tap))
     tent_to("T4_PieIzq", tip_rest["T4_PieIzq"].lerp(key_pos, reach))
     PB["Cabeza"].rotation_euler.z = D(-18) * reach; PB["Cabeza"].rotation_euler.x = D(6) * reach
@@ -828,7 +840,7 @@ def k_relax(f, u):
     elif f <= 60: s = smooth(1 - (f - 42) / 18.0)
     else: s = 0.0
     sip = MOUTH + Vector((0.02, -0.05, -0.055))                 # punta de T3: la taza queda delante de los labios
-    tent_to("T3_Taza", tip_rest["T3_Taza"].lerp(sip, s))
+    tent_to("T3_Taza", TENT_DOWN["T3_Taza"].lerp(sip, s))   # v011: la taza parte de la posición relajada
     PB["Cabeza"].rotation_euler.x = D(-7) * s; PB["Root"].location.z = 0.004 * math.sin(2 * math.pi * f / 72.0)
     brow("I", 0.004 * s); brow("D", 0.004 * s)
     if 22 <= f <= 40: lids(180, 180); show("OjoFeliz_I", "OjoFeliz_D"); KEYS["O"].value = 0.5
@@ -838,6 +850,7 @@ def k_organizar(f, u):
     """T5 (pie derecho) marca una tarea en la checklist que sostiene T6; mira la hoja y sonríe; checklist y panel"""
     mode("Acc_Checklist", "Acc_Panel")
     reach = smooth(f / 10.0) * smooth(1 - (f - 38) / 10.0)
+    tent_to("T6_Checklist", TENT_DOWN["T6_Checklist"].lerp(tip_rest["T6_Checklist"], reach))   # v011: T6 sube la checklist solo aquí
     tap = math.sin(math.pi * (f - 16) / 8.0) if 16 <= f <= 24 else 0.0
     pos = CHECK + Vector((-0.015, -0.045 + 0.02 * tap, 0.01))     # delante de la hoja (mira a -Y); el toque acerca la punta
     tent_to("T5_PieDer", tip_rest["T5_PieDer"].lerp(pos, reach))
@@ -861,7 +874,7 @@ cam("Cam_Perfil_Der", (-3, 0, 0.5), (math.pi / 2, 0, -math.pi / 2))
 cam("Cam_Perfil_Izq", (3, 0, 0.5), (math.pi / 2, 0, math.pi / 2))
 cam("Cam_Espalda", (0, 3, 0.5), (math.pi / 2, 0, math.pi))
 cam("Cam_3-4", (1.55, -1.55, 0.95), (math.radians(72), 0, math.radians(45)), ortho=False)
-cam("Cam_Busto", (0, -3, head_c.z - 0.08), (math.pi / 2, 0, 0), scale=0.62)
+cam("Cam_Busto", (0, -3, head_c.z - 0.045), (math.pi / 2, 0, 0), scale=0.70)   # v011: encuadre más amplio y centrado más alto; las rayitas de énfasis entran con margen
 def light(name, kind, energy, loc, rot, size=None):
     ld = bpy.data.lights.new(name, kind); ld.energy = energy
     if size and kind == 'AREA': ld.size = size
@@ -967,4 +980,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v010 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v011 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
