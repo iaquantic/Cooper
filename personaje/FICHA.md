@@ -107,30 +107,41 @@ Laptop con logo Q en la tapa y pantalla con panel de control, móvil con asisten
 (apagada o encendida). Cada accesorio sigue al tentáculo que lo sostiene; se pueden ocultar por objeto.
 
 ## Expresiones y poses disponibles
-En el `.glb` y el `.fbx` van como animaciones; en el `.blend` como pistas NLA.
+En el `.glb` y el `.fbx` van como animaciones; en el `.blend` como pistas NLA. Versión v010.
 
-| Animación | Contenido |
-|---|---|
-| `Expresiones` (fotogramas 0-6) | 0 neutro · 1 feliz · 2 sorprendido · 3 pensativo (tentáculo en la barbilla) · 4 guiñando · 5 serio (tentáculos cruzados) · 6 risa |
-| `Idle` (72 f, 3 s, bucle) | respiración, balanceo de cabeza, tentáculos ondulando, mirada que vaga, parpadeo |
-| `Saludo` (48 f, 2 s) | levanta el tentáculo delantero derecho y saluda, ojos felices |
-| `Idea` (48 f, 2 s) | la bombilla se enciende con un bote del tentáculo, sorpresa y sonrisa |
-| `Tecleo` (48 f, 2 s) | mira al laptop y teclea con el tentáculo delantero izquierdo |
+| Animación | Contenido | Accesorio visible |
+|---|---|---|
+| `Expresiones` (fotogramas 0-6) | 0 neutro · 1 feliz · 2 sorprendido · 3 pensativo (tentáculo en la barbilla) · 4 guiñando · 5 serio (tentáculos cruzados) · 6 risa | no cambia (lo decide el proyecto) |
+| `Idle` (72 f, 3 s, bucle) | respiración, balanceo de cabeza, tentáculos ondulando, mirada que vaga, parpadeo | no cambia (lo decide el proyecto) |
+| `Saludo` (48 f, 2 s) | levanta el tentáculo delantero derecho y saluda, ojos felices | ninguno |
+| `Idea` (48 f, 2 s) | sube la bombilla, se enciende con un bote, sorpresa y sonrisa | `Acc_Bombilla` |
+| `Tecleo` (48 f, 2 s) | mira al portátil y teclea con el tentáculo delantero izquierdo | `Acc_Laptop` |
+| `Relax` (72 f, 3 s, bucle) | sube la taza, da un sorbo con los ojos cerrados y felices, la baja y sonríe | `Acc_Taza` |
+| `Organizar` (48 f, 2 s) | mira la checklist, marca una tarea con un tentáculo y sonríe | `Acc_Checklist` y `Acc_Panel` |
 
-Renders con fondo transparente en `modelo/renders/`: frontal, tres cuartos y las siete expresiones.
+Accesorios con nombre fijo para mostrar u ocultar desde código: `Acc_Bombilla`, `Acc_Laptop`,
+`Acc_Movil`, `Acc_Taza`, `Acc_Checklist`, `Acc_Panel` (nodo con ese nombre en el `.glb`/`.fbx`;
+colección y hueso con ese nombre en el `.blend`). Qué va visible en cada modo: `modelo/NOTAS.md`.
+
+Renders con fondo transparente (1600 × 2000) en `modelo/renders/`: `modos/` (un accesorio por modo,
+de frente y de tres cuartos; sin accesorios; saludando) y `expresiones/` (las siete, sin accesorios).
 
 ## Uso
-- **Publicaciones:** elegir primero el modo según la situación y usar el render de ese modo. Los PNG
-  actuales de `modelo/renders/` (1600 × 2000, fondo transparente) muestran todos los accesorios a la vez;
-  los renders por modo están pendientes. Para una pose o expresión nueva se renderiza desde el `.blend`.
-- **Animaciones:** `modelo/animacion/cooper_v009_rig.fbx` o el `.glb` con rig. Esqueleto de 49 huesos:
-  raíz, cuerpo, cabeza, mirada (los ojos la siguen), párpados, cejas, ojos felices, dientes, marcas,
-  bombilla encendida/apagada y ocho cadenas de tentáculo con control IK en la punta; boca con shape keys
-  (O, plano, risa, puchero). Los cinco clips anteriores vienen incluidos.
-- **Dentro de proyectos:** `modelo/web/cooper_v009.glb` (escala 1, Y arriba, 14,9 MB con texturas y las
-  cinco animaciones). Para pantallas con otro contenido, sustituir los PNG de pantalla y reexportar.
+- **Publicaciones:** elegir primero el modo según la situación y usar el render de ese modo en
+  `modelo/renders/modos/`: `cooper_idea_*`, `cooper_trabajo_*`, `cooper_relax_*`, `cooper_organizar_*`
+  (de frente y de tres cuartos), `cooper_sin_accesorios_frente.png` y `cooper_saludo_*`. Las expresiones
+  están en `modelo/renders/expresiones/`. Para una pose o expresión nueva se renderiza desde el `.blend`.
+- **Animaciones:** `modelo/animacion/cooper_v010_rig.fbx` o `cooper_v010_rig.glb`. Esqueleto de 55
+  huesos: raíz, cuerpo, cabeza, mirada (los ojos la siguen), párpados, cejas, ojos felices, dientes,
+  marcas, bombilla encendida/apagada, seis huesos de accesorio `Acc_*` y ocho cadenas de tentáculo con
+  control IK en la punta; boca con shape keys (O, plano, risa, puchero). Los siete clips vienen incluidos;
+  los de modo fijan solos qué accesorio se ve.
+- **Dentro de proyectos:** `modelo/web/cooper_v010.glb` (escala 1, Y arriba, 15 MB con texturas y las
+  siete animaciones). Al cargarlo los seis accesorios están visibles: ocultar por nombre los que no
+  toquen (`Acc_*`) o reproducir el clip del modo, que ya lo hace. Para pantallas con otro contenido,
+  sustituir los PNG de pantalla y reexportar.
 
 ## Pendiente
 - Confirmar los hex oficiales con la guía de marca de Quantic y, si difieren, rehornear.
-- Renders y animaciones por modo (Idea, Trabajo, Relax, Organizar y datos) con un solo accesorio
-  visible. Las animaciones y renders actuales muestran todos los accesorios a la vez.
+- Revisar la tabla de modos de "Personalidad": con v010, a Relax le corresponde la animación `Relax`
+  y a Organizar y datos, `Organizar`.

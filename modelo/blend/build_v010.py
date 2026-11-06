@@ -1,14 +1,16 @@
-# Mascota Quantic — construcción v009 (Blender 5.2, ejecutar dentro de Blender)
-# Parte de build_v008.py. Correcciones pedidas por Leo el 2026-11-06: cejas negras, interior de la
-# boca negro (la lengua sigue rosa) y asa de la taza colocada de lado (anilla en el plano XZ que
-# sobresale por el lateral, no atravesada en la pared). La piel no cambia: bake_reuse(src) desenvuelve
-# igual que v008 y carga las texturas ya horneadas desde v008/texturas en vez de rehornear
-# (bake_all() sigue disponible si cambia la piel).
+# Cooper (mascota Quantic) — construcción v010 (Blender 5.2, ejecutar dentro de Blender)
+# Parte de build_v009.py. Pedido de Quantic/Leo del 2026-11-06: Cooper lleva un solo accesorio según el
+# modo. Cada accesorio cuelga de un hueso de visibilidad con nombre fijo (Acc_Bombilla, Acc_Laptop,
+# Acc_Movil, Acc_Taza, Acc_Checklist, Acc_Panel) y vive en una colección del mismo nombre; en el glTF ese
+# hueso es el nodo que hay que ocultar. Los clips de modo (Idea, Tecleo, Relax, Organizar) y Saludo
+# animan esa visibilidad; Expresiones e Idle no la tocan. Clips nuevos: Relax (sorbo a la taza, bucle)
+# y Organizar (marca una tarea en la checklist y sonríe). Piel, colores y proporciones: iguales que v009
+# (bake_reuse con v008/texturas).
 import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v009"
+BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v010"
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -358,12 +360,18 @@ for name, pts in TENT.items():
     tent_meshes[name] = m
 
 # ---------------------------------------------------------------- accesorios
-def group(name, objs):
-    vl.update()
-    e = bpy.data.objects.new(name, None); C_ACC.objects.link(e); e.empty_display_size = 0.03
+def acc_coll(name):
+    c = bpy.data.collections.get(name)
+    if not c:
+        c = bpy.data.collections.new(name); C_ACC.children.link(c)
+    return c
+def group(name, objs, coll_name):
+    """empty Grp_* que agrupa las mallas de un accesorio; todo en la colección Acc_* del accesorio"""
+    vl.update(); c = acc_coll(coll_name)
+    e = bpy.data.objects.new(name, None); c.objects.link(e); e.empty_display_size = 0.03
     e.location = objs[0].matrix_world.translation.copy(); vl.update()
     for o in objs:
-        o.parent = e; o.matrix_parent_inverse = e.matrix_world.inverted()
+        o.parent = e; o.matrix_parent_inverse = e.matrix_world.inverted(); link(o, c)
     return e
 A = C_ACC
 bx, by, bz = -0.25, -0.06, 0.88
@@ -377,11 +385,12 @@ for i, ang in enumerate((-55, -18, 18, 55)):
     rays.append(cyl(f"Bombilla_Rayo_{i + 1}", (rx, by, rz), 0.0035, 0.035, M['rayo'], rot=(0, a, 0), verts=8, c=A))
 b_glass_off = qsphere("Bombilla_Vidrio_Off", (bx, by, bz + 0.12), 0.052, m=M['vidrio_off'], scale=(1, 1, 1.15), levels=3, c=A)
 b_fil_off = qsphere("Bombilla_Filamento_Off", (bx, by, bz + 0.115), 0.022, m=M['filamento_off'], levels=1, c=A)
-group("Acc_Bombilla", [b_base, b_ring])
+group("Grp_Bombilla", [b_base, b_ring], "Acc_Bombilla")
 def vis_group(name, objs, loc):
-    e = bpy.data.objects.new(name, None); C_ACC.objects.link(e); e.location = loc; vl.update()
+    c = acc_coll("Acc_Bombilla")
+    e = bpy.data.objects.new(name, None); c.objects.link(e); e.location = loc; vl.update()
     for o in objs:
-        o.parent = e; o.matrix_parent_inverse = e.matrix_world.inverted()
+        o.parent = e; o.matrix_parent_inverse = e.matrix_world.inverted(); link(o, c)
     return e
 luz_e = vis_group("Luz", [b_glass, b_fil] + rays, (bx, by, bz + 0.12))          # encendida: vidrio emisivo, filamento y rayos
 luzoff_e = vis_group("LuzOff", [b_glass_off, b_fil_off], (bx, by, bz + 0.12))   # apagada: vidrio mate y filamento oscuro
@@ -423,7 +432,7 @@ kc = k0 + (Rz @ Vector((10 * 0.011 * 1.3 / 2, 3 * 0.011 * 1.4 / 2, 0.0)))   # ce
 bpy.ops.mesh.primitive_plane_add(size=1, location=(kc.x, kc.y, lz + 0.0112)); l_letters = bpy.context.active_object
 l_letters.name = "Laptop_Letras"; l_letters.scale = (0.157, 0.062, 1); l_letters.rotation_euler = (0, 0, 0.15 + math.pi)   # legible desde el lado de la pantalla
 l_letters.data.materials.append(screen_mat('Q_Teclas', 'teclas.png', emit=0.0, rough=0.6, alpha=True)); link(l_letters, A)
-group("Acc_Laptop", [l_base, l_lid, l_scr, l_q, l_kb, l_hinge, l_key, l_tp, l_letters])
+group("Grp_Laptop", [l_base, l_lid, l_scr, l_q, l_kb, l_hinge, l_key, l_tp, l_letters], "Acc_Laptop")
 px, py, pz = 0.29, -0.20, 0.61
 p_body = cube("Movil_Cuerpo", (px, py, pz), (0.058, 0.009, 0.115), M['negro'], rot=(0.1, 0.15, -0.25), c=A)
 R_ph = Matrix.Rotation(-0.25, 4, 'Z') @ Matrix.Rotation(0.15, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
@@ -432,7 +441,7 @@ p_scr = screen_plane("Movil_Pantalla", Vector((px, py, pz)) + (R_ph @ Vector((0,
 Rp = Matrix.Rotation(-0.25, 4, 'Z') @ Matrix.Rotation(0.15, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
 p_cam = cyl("Movil_Camara", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, 0.046))), 0.004, 0.002, M['gris'], rot=(math.pi / 2 + 0.1, 0.15, -0.25), verts=12, c=A)
 p_bar = cube("Movil_Barra", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, -0.047))), (0.022, 0.001, 0.003), M['blanco'], rot=(0.1, 0.15, -0.25), c=A)
-group("Acc_Movil", [p_body, p_scr, p_cam, p_bar])
+group("Grp_Movil", [p_body, p_scr, p_cam, p_bar], "Acc_Movil")
 tx, ty, tz = -0.33, -0.27, 0.30
 TAZA_GIRO = math.radians(-90)   # gira el cilindro para que el centro de la tira UV (logo) mire al frente (-Y)
 def uv_cylinder(name, loc, r, h, m, N=48, front=-math.pi / 2, c=C_ACC):
@@ -464,14 +473,14 @@ t_in = cyl("Taza_Cafe", (tx, ty, tz + 0.0405), 0.039, 0.01, mat('Q_Cafe', '#3A24
 t_h = torus("Taza_Asa", (tx - 0.044 + 0.004, ty, tz), 0.030, 0.0075, M['negro'], rot=(math.pi / 2, 0, 0), c=A)
 t_h.scale = (0.75, 1.15, 1.0)                       # más alto que ancho (local Y = mundo Z tras el giro de 90° en X)
 bisect_keep(t_h, (0.0, 0, 0), (-1, 0, 0), keep_positive=True)   # conserva solo la mitad exterior (x local <= 0)
-group("Acc_Taza", [t_body, t_in, t_h])
+group("Grp_Taza", [t_body, t_in, t_h], "Acc_Taza")
 cx, cy, cz = 0.41, -0.24, 0.34; rotc = (0.1, -0.1, -0.2)
 c_board = cube("Checklist_Tabla", (cx, cy, cz), (0.095, 0.008, 0.125), M['negro'], rot=rotc, c=A)
 R_cl = Matrix.Rotation(-0.2, 4, 'Z') @ Matrix.Rotation(-0.1, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
 c_paper = screen_plane("Checklist_Hoja", Vector((cx, cy, cz - 0.005)) + (R_cl @ Vector((0, -0.0045, 0))), (0.082, 0.105), R_cl,
                        screen_mat('Q_Checklist', 'checklist.png', emit=0.0, rough=0.7))
 c_clip = cube("Checklist_Clip", (cx, cy, cz + 0.062), (0.035, 0.014, 0.018), M['cuerda'], rot=rotc, c=A)
-group("Acc_Checklist", [c_board, c_paper, c_clip])
+group("Grp_Checklist", [c_board, c_paper, c_clip], "Acc_Checklist")
 dx, dy, dz = 0.44, -0.10, 0.74; rotd = (0, 0, -0.35)
 Rd = Matrix.Rotation(-0.35, 4, 'Z'); dc = Vector((dx, dy, dz))
 d_frames = [cube(f"Panel_Marco_{n}", dc + (Rd @ Vector(off)), dims, M['cian'], rot=rotd, c=A) for n, off, dims in (
@@ -483,7 +492,7 @@ bars = [cube(f"Panel_Barra_{i + 1}", (dx - 0.03 + i * 0.03, dy - 0.004, dz - 0.0
 d_arrow = cube("Panel_Flecha", (dx, dy - 0.004, dz + 0.03), (0.09, 0.002, 0.005), M['blanco'], rot=(0, -0.5, -0.35), c=A)
 tip = Vector((dx, dy - 0.004, dz + 0.03)) + (Rd @ (Matrix.Rotation(-0.5, 4, 'Y') @ Vector((0.045, 0, 0))))
 d_head = cube("Panel_Flecha_Punta", tip, (0.014, 0.002, 0.014), M['blanco'], rot=(0, -0.5 + math.pi / 4, -0.35), c=A)
-group("Acc_Panel", d_frames + [d_body] + bars + [d_arrow, d_head])
+group("Grp_Panel", d_frames + [d_body] + bars + [d_arrow, d_head], "Acc_Panel")
 
 # ---------------------------------------------------------------- escala a 1 m y aplicar
 def bbox():
@@ -562,9 +571,15 @@ for tn in TENT:
     chains[tn] = names
     tip = pts[-1]; d = (pts[-1] - pts[-2]).normalized() * 0.05
     bone(f"{tn}_IK", tip, tip + d, "Root", ctrl=True, deform=False); ik_targets[tn] = f"{tn}_IK"
+ACC_PARENT = {"Acc_Bombilla": ("Grp_Bombilla", "T1_Bombilla.003"), "Acc_Laptop": ("Grp_Laptop", "T2_Laptop.003"), "Acc_Taza": ("Grp_Taza", "T3_Taza.003"),
+              "Acc_Checklist": ("Grp_Checklist", "T6_Checklist.003"), "Acc_Movil": ("Grp_Movil", "T7_Movil.003"), "Acc_Panel": ("Grp_Panel", "Panel")}
+ACC = set(ACC_PARENT)
+for an, (gn, parent_bone) in ACC_PARENT.items():   # un hueso de visibilidad por accesorio, con nombre fijo
+    gc = bpy.data.objects[gn].matrix_world.translation
+    bone(an, (gc.x, gc.y, gc.z), (gc.x, gc.y - 0.05, gc.z), parent_bone, ctrl=True, deform=False)
 rc = luz_e.matrix_world.translation
-bone("Luz", (rc.x, rc.y, rc.z), (rc.x, rc.y - 0.04, rc.z), "T1_Bombilla.003", ctrl=True, deform=False)
-bone("LuzOff", (rc.x, rc.y + 0.01, rc.z), (rc.x, rc.y - 0.03, rc.z), "T1_Bombilla.003", ctrl=True, deform=False)
+bone("Luz", (rc.x, rc.y, rc.z), (rc.x, rc.y - 0.04, rc.z), "Acc_Bombilla", ctrl=True, deform=False)
+bone("LuzOff", (rc.x, rc.y + 0.01, rc.z), (rc.x, rc.y - 0.03, rc.z), "Acc_Bombilla", ctrl=True, deform=False)
 bpy.ops.object.mode_set(mode='OBJECT'); arm.show_in_front = True; vl.update()
 # colecciones de huesos
 bc_def = arm_data.collections.new("Deformacion"); bc_ctl = arm_data.collections.new("Controles")
@@ -590,9 +605,8 @@ for side in ("I", "D"):
     bone_parent(brows[side], f"Ceja_{side}")
     bone_parent(bpy.data.objects[f"OjoFeliz_{side}"], f"OjoFeliz_{side}")
 bone_parent(teeth, "Dientes"); bone_parent(marks_e, "Marcas"); bone_parent(luz_e, "Luz"); bone_parent(luzoff_e, "LuzOff")
-for en, bn in {"Acc_Bombilla": "T1_Bombilla.003", "Acc_Laptop": "T2_Laptop.003", "Acc_Taza": "T3_Taza.003",
-               "Acc_Checklist": "T6_Checklist.003", "Acc_Movil": "T7_Movil.003", "Acc_Panel": "Panel"}.items():
-    bone_parent(bpy.data.objects[en], bn)
+for an, (gn, _) in ACC_PARENT.items():
+    bone_parent(bpy.data.objects[gn], an)
 def seg_param(p, a, b):
     ab = b - a; t = (p - a).dot(ab) / max(ab.length_squared, 1e-12); t = max(0.0, min(1.0, t))
     return t, ((a + ab * t) - p).length
@@ -634,18 +648,25 @@ def reset():
         pb.location = (0, 0, 0); pb.rotation_euler = (0, 0, 0); pb.scale = (0.001, 0.001, 0.001) if pb.name in VIS else (1, 1, 1)
     for k in KEYS: k.value = 0.0
     vl.update()
+    tent_to("T1_Bombilla", T1_DOWN); vl.update()   # v010: sin bombilla, el tentáculo T1 no se queda en alto (Idea lo sube)
 def show(*names):
     for n in names: PB[n].scale = (1, 1, 1)
 def hide(*names):
     for n in names: PB[n].scale = (0.001, 0.001, 0.001)
-def key_all(frame):
+def key_all(frame, acc=False):
+    """clava todos los controles; los huesos Acc_* solo si acc=True (clips de modo), para que Expresiones e Idle no fuercen la visibilidad"""
     for pb in PB:
-        if pb.name in CTRL:
+        if pb.name in CTRL and (acc or pb.name not in ACC):
             pb.keyframe_insert("location", frame=frame); pb.keyframe_insert("rotation_euler", frame=frame); pb.keyframe_insert("scale", frame=frame)
     for k in KEYS:
         if k.name != "Basis": k.keyframe_insert("value", frame=frame)
+def mode(*visible):
+    """deja visibles solo los accesorios indicados (huesos Acc_*)"""
+    for a in ACC: (show if a in visible else hide)(a)
 D = math.radians
 tip_rest = {tn: (arm.matrix_world @ arm.data.bones[ik_targets[tn]].head_local).copy() for tn in TENT}
+T1_DOWN = Vector((-0.34, 0.06, 0.40))                      # T1 relajado junto a la sudadera (fuera del encuadre del busto) cuando no sostiene la bombilla
+idle_rest = dict(tip_rest); idle_rest["T1_Bombilla"] = T1_DOWN
 def tent_to(tn, world): set_world_loc(PB[ik_targets[tn]], world)
 BROW_R = arm.data.bones["Ceja_I"].length
 def brow(side, dz=0.0, tilt=0.0):
@@ -694,10 +715,7 @@ act_expr = arm.animation_data.action; act_expr.use_fake_user = True
 act_boca = mouth.data.shape_keys.animation_data.action; act_boca.use_fake_user = True
 arm.animation_data.action = None
 IDLE_LEN = 72; sc.render.fps = 24
-def idle_key(frame):
-    for pb in PB:
-        if pb.name in CTRL:
-            pb.keyframe_insert("location", frame=frame); pb.keyframe_insert("rotation_euler", frame=frame); pb.keyframe_insert("scale", frame=frame)
+def idle_key(frame): key_all(frame, acc=False)
 phase = {tn: i * 2 * math.pi / 8 for i, tn in enumerate(TENT)}
 for f in range(0, IDLE_LEN + 1, 6):
     t = 2 * math.pi * f / IDLE_LEN
@@ -706,7 +724,7 @@ for f in range(0, IDLE_LEN + 1, 6):
     PB["Cabeza"].rotation_euler.z = D(3.0) * math.sin(t)                # balanceo lateral de la cabeza
     PB["Cabeza"].rotation_euler.x = D(1.5) * math.sin(2 * t)
     for tn in TENT:
-        tent_to(tn, tip_rest[tn] + Vector((0.008 * math.sin(t + phase[tn]), 0.0, 0.014 * math.sin(t + phase[tn] + 1.0))))
+        tent_to(tn, idle_rest[tn] + Vector((0.008 * math.sin(t + phase[tn]), 0.0, 0.014 * math.sin(t + phase[tn] + 1.0))))
     set_world_loc(PB["Mirada"], (0.06 * math.sin(t), -0.55, ez + 0.03 * math.sin(t + 0.7)))
     idle_key(f)
 # parpadeo rápido en los fotogramas 40-46
@@ -733,7 +751,7 @@ NT_LUZ = []   # v006: la bombilla apagada/encendida son dos mallas; no se anima 
 def anim_ids():
     return [idd for idd in [arm, mouth.data.shape_keys] + NT_LUZ if idd.animation_data]
 def solo(name):
-    """deja sonando solo la pista NLA indicada (Expresiones, Idle, Saludo, Idea, Tecleo) en todos los datablocks animados"""
+    """deja sonando solo la pista NLA indicada (Expresiones, Idle, Saludo, Idea, Tecleo, Relax, Organizar); con name=None, ninguna"""
     for idd in anim_ids():
         for tr in idd.animation_data.nla_tracks:
             tr.is_solo = (tr.name == name)
@@ -747,11 +765,11 @@ EMIS_REST = {nt.name: emis(nt).default_value for nt in NT_LUZ}
 def key_emis(frame, factor):
     for nt in NT_LUZ:
         emis(nt).default_value = EMIS_REST[nt.name] * factor; emis(nt).keyframe_insert("default_value", frame=frame)
-def make_clip(name, length, keyer, step=4, with_light=False):
+def make_clip(name, length, keyer, step=4, with_light=False, acc=True):
     for idd in [arm, mouth.data.shape_keys] + NT_LUZ:
         if idd.animation_data: idd.animation_data.action = None
     for f in range(0, length + 1, step):
-        reset(); keyer(f, f / length); key_all(f)
+        reset(); keyer(f, f / length); key_all(f, acc=acc)
     acts = []
     for idd in [arm, mouth.data.shape_keys] + (NT_LUZ if with_light else []):
         ad = idd.animation_data
@@ -765,7 +783,8 @@ def make_clip(name, length, keyer, step=4, with_light=False):
     reset(); return acts
 LAPTOP = bpy.data.objects["Laptop_Teclado"].matrix_world.translation.copy()
 def k_saludo(f, u):
-    """T5 (pie derecho) se levanta y saluda; cara contenta"""
+    """T5 (pie derecho) se levanta y saluda; cara contenta; sin accesorios"""
+    mode()
     up = min(1.0, f / 8.0); back = max(0.0, (f - 40) / 8.0)
     lift = up * (1 - back)
     wave = math.sin((f - 8) / 32.0 * 2 * math.pi * 2) if 8 <= f <= 40 else 0.0
@@ -776,16 +795,19 @@ def k_saludo(f, u):
     if 10 <= f <= 38: show("OjoFeliz_I", "OjoFeliz_D"); lids(180, 180)
 def k_idea(f, u):
     """la bombilla está apagada, el tentáculo la alza, se enciende con rayos y marcas; cara de sorpresa y luego sonrisa"""
+    mode("Acc_Bombilla")
     on = 0.0 if f < 18 else min(1.0, (f - 18) / 4.0)
     if on < 1.0: hide("Luz"); show("LuzOff")
     bounce = math.sin(min(1.0, max(0.0, (f - 14) / 16.0)) * math.pi) * 0.07
-    tent_to("T1_Bombilla", tip_rest["T1_Bombilla"] + Vector((0, 0, bounce)))
+    up = min(1.0, f / 14.0); up = up * up * (3 - 2 * up)       # sube la bombilla desde la posición relajada
+    tent_to("T1_Bombilla", T1_DOWN.lerp(tip_rest["T1_Bombilla"], up) + Vector((0, 0, bounce)))
     tilt = min(1.0, max(0.0, (f - 8) / 10.0)) * (1 - max(0.0, (f - 36) / 12.0))
     PB["Cabeza"].rotation_euler.x = D(-6) * tilt; brow("I", 0.016 * tilt); brow("D", 0.016 * tilt)
     if 20 <= f <= 34: show("Marcas"); KEYS["O"].value = 1.0
     elif f > 34: KEYS["Risa"].value = 0.35; show("Dientes")
 def k_tecleo(f, u):
-    """mira al laptop y teclea con T4 (pie izquierdo); parpadeo a mitad"""
+    """mira al laptop y teclea con T4 (pie izquierdo); parpadeo a mitad; solo el portátil"""
+    mode("Acc_Laptop")
     tap = abs(math.sin(f / 48.0 * 2 * math.pi * 4))
     reach = min(1.0, f / 6.0) * (1 - max(0.0, (f - 42) / 6.0))
     key_pos = LAPTOP + Vector((0.02 * math.sin(f / 48.0 * 2 * math.pi * 2), -0.02, 0.02 + 0.03 * tap))
@@ -794,7 +816,37 @@ def k_tecleo(f, u):
     set_world_loc(PB["Mirada"], Vector((0, -0.55, ez)).lerp(LAPTOP + Vector((0, -0.05, 0.08)), reach))
     lids(25 * reach, 25 * reach)
     if 22 <= f <= 26: lids(180, 180)
-CLIPS = {"Saludo": make_clip("Saludo", 48, k_saludo), "Idea": make_clip("Idea", 48, k_idea), "Tecleo": make_clip("Tecleo", 48, k_tecleo)}
+MOUTH = bpy.data.objects["Boca"].matrix_world.translation.copy()
+CHECK = bpy.data.objects["Checklist_Hoja"].matrix_world.translation.copy()
+def smooth(x): x = min(1.0, max(0.0, x)); return x * x * (3 - 2 * x)
+def k_relax(f, u):
+    """bucle tranquilo: T3 sube la taza a la boca, sorbo con ojos cerrados, baja y sonríe; solo la taza"""
+    mode("Acc_Taza")
+    if f <= 18: s = smooth(f / 18.0)
+    elif f <= 42: s = 1.0
+    elif f <= 60: s = smooth(1 - (f - 42) / 18.0)
+    else: s = 0.0
+    sip = MOUTH + Vector((0.02, -0.05, -0.055))                 # punta de T3: la taza queda delante de los labios
+    tent_to("T3_Taza", tip_rest["T3_Taza"].lerp(sip, s))
+    PB["Cabeza"].rotation_euler.x = D(-7) * s; PB["Root"].location.z = 0.004 * math.sin(2 * math.pi * f / 72.0)
+    brow("I", 0.004 * s); brow("D", 0.004 * s)
+    if 22 <= f <= 40: lids(180, 180); show("OjoFeliz_I", "OjoFeliz_D"); KEYS["O"].value = 0.5
+    else: lids(18 * s, 18 * s)
+    if f >= 48 or f <= 6: KEYS["Risa"].value = 0.25 * (1 - s)   # sonrisa relajada al bajar la taza
+def k_organizar(f, u):
+    """T5 (pie derecho) marca una tarea en la checklist que sostiene T6; mira la hoja y sonríe; checklist y panel"""
+    mode("Acc_Checklist", "Acc_Panel")
+    reach = smooth(f / 10.0) * smooth(1 - (f - 38) / 10.0)
+    tap = math.sin(math.pi * (f - 16) / 8.0) if 16 <= f <= 24 else 0.0
+    pos = CHECK + Vector((-0.015, -0.045 + 0.02 * tap, 0.01))     # delante de la hoja (mira a -Y); el toque acerca la punta
+    tent_to("T5_PieDer", tip_rest["T5_PieDer"].lerp(pos, reach))
+    PB["Cabeza"].rotation_euler.z = D(14) * reach; PB["Cabeza"].rotation_euler.x = D(4) * reach
+    set_world_loc(PB["Mirada"], Vector((0, -0.55, ez)).lerp(CHECK + Vector((0, -0.35, 0.02)), reach))
+    lids(15 * reach, 15 * reach)
+    if f >= 26: g = smooth((f - 26) / 6.0); KEYS["Risa"].value = 0.35 * g; brow("I", 0.008 * g); brow("D", 0.008 * g); show("Dientes")
+    if 30 <= f <= 42: lids(180, 180); show("OjoFeliz_I", "OjoFeliz_D")
+CLIPS = {"Saludo": make_clip("Saludo", 48, k_saludo), "Idea": make_clip("Idea", 48, k_idea), "Tecleo": make_clip("Tecleo", 48, k_tecleo),
+         "Relax": make_clip("Relax", 72, k_relax), "Organizar": make_clip("Organizar", 48, k_organizar)}
 print("clips:", CLIPS)
 solo("Idle")
 
@@ -914,4 +966,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v009 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v010 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))

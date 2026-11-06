@@ -9,7 +9,7 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 | Parte | Estado | Origen |
 |---|---|---|
 | Personalidad y características | Definidas el 2026-11-06 (`personaje/FICHA.md`) | Aspecto: Modelador 3D · Personalidad: Quantic |
-| Modelo 3D | Entregado el 2026-11-06, versión v009 (`modelo/`, notas en `modelo/NOTAS.md`) | Modelador 3D |
+| Modelo 3D | Entregado el 2026-11-06, versión v010: modos con un solo accesorio, clips `Relax` y `Organizar`, renders por modo (`modelo/`, notas en `modelo/NOTAS.md`) | Modelador 3D |
 
 ## Estructura
 
@@ -20,8 +20,8 @@ modelo/
   blend/            Archivo de trabajo de Blender (.blend)
   web/              Modelo para web y proyectos en tiempo real (.glb)
   animacion/        Versión con esqueleto para animar (.fbx / .glb con rig)
-  renders/          Imágenes de Cooper con fondo transparente (.png)
-  NOTAS.md          Notas de la versión entregada (v009)
+  renders/          Imágenes con fondo transparente: modos/, expresiones/ y comparacion/ (.png)
+  NOTAS.md          Notas de la versión entregada (v010): nombres de accesorios y visibilidad por modo
 SOLICITUD-MODELADOR-3D.md   Pedido al Modelador 3D
 ```
 
