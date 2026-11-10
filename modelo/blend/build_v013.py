@@ -1,4 +1,9 @@
-# Cooper (mascota Quantic) — construcción v012 (Blender 5.2, ejecutar dentro de Blender)
+# Cooper (mascota Quantic) — construcción v013 (Blender 5.2, ejecutar dentro de Blender)
+# v013 (revisión de Quantic de la v012): (1) en 3 pensativo la punta del brazo izquierdo se apoya en la cara, bajo la
+# boca y a la izquierda, con el tentáculo curvado hacia arriba (face_point sobre el elipsoide de la cabeza, con pose
+# inicial del brazo que lleva el codo abajo); (2) las bocas de Expresiones en el .glb/.fbx: la acción Expresiones_Boca
+# ya no arrastra las claves de Idle (Idle tiene su propia Idle_Boca) y cada clip ocupa un rango de fotogramas distinto
+# (CLIP_START) para que FBX hornee la boca correcta por clip; al exportar se desilencian las pistas de boca.
 # v012 (dos arreglos de alcance de los brazos, revisión de Quantic de la v011): en Relax el borde de la taza toca
 # la boca, con la taza inclinada hacia ella (objetivo resuelto midiendo la taza evaluada, cabeza 5° hacia la taza);
 # en la expresión 3 pensativo la punta del brazo izquierdo se apoya bajo la barbilla (punto calculado sobre la
@@ -21,7 +26,7 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v012"
+BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v013"
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -660,6 +665,7 @@ for tn, names in chains.items():
     if tn in sleeves: skin_to_chain(sleeves[tn], names)
 vl.update()
 
+ARM_BIAS_1 = (0.0, 0.0, -1.1); ARM_BIAS_2 = (-1.1, 0.0, 0.0)   # v013: giro inicial de los dos primeros huesos del brazo izquierdo en pensativo (codo abajo)
 # ---------------------------------------------------------------- expresiones (acción "Expresiones", fotogramas 0-6)
 PB = arm.pose.bones
 KEYS = mouth.data.shape_keys.key_blocks
@@ -743,13 +749,19 @@ reset(); show("Marcas"); brow("I", 0.018); brow("D", 0.018); KEYS["O"].value = 1
 reset(); lids(40, 40); set_world_loc(PB["Mirada"], (-0.25, -0.55, ez + 0.22))
 brow("I", 0.012, 12); brow("D", -0.005, -6); KEYS["Puchero"].value = 1.0; PB["Cabeza"].rotation_euler.z = D(8)
 def chin_point(d_local=(-0.12, -0.70, -0.70), out=0.014):
-    """punto bajo la barbilla: intersección de la dirección d_local con el elipsoide de la cabeza (evaluada), más el radio de la mano"""
+    """punto sobre la cabeza: intersección de la dirección d_local (local de la cabeza) con su elipsoide (evaluado), más el radio de la mano.
+    v013: para pensativo se usa la parte delantera de la cara, bajo la boca y a la izquierda (FACE_DIR), no la barbilla (quedaba en el cuello)"""
     vl.update(); dg = bpy.context.evaluated_depsgraph_get(); M = head.evaluated_get(dg).matrix_world
     bb = head.bound_box; rx, ry, rz = [(bb[6][i] - bb[0][i]) / 2 for i in range(3)]
     d = Vector(d_local).normalized(); t = 1.0 / math.sqrt((d.x / rx) ** 2 + (d.y / ry) ** 2 + (d.z / rz) ** 2)
     p = M @ (d * t); n = (M.to_3x3() @ d).normalized()
     return p + n * out
-tent_to("T2_BrazoIzq", chin_point()); key_all(3)   # v012: la punta del brazo izquierdo apoyada bajo la barbilla (v011 quedaba delante del pecho)
+FACE_DIR = (-0.30, -0.80, -0.52)   # v013: delante de la cara, justo debajo de la boca y a la izquierda (la boca queda libre)
+def arm_bias(tn, rot1, rot2):
+    """pose inicial de la cadena antes de resolver el IK: el solucionador parte de aquí, así que decide hacia dónde va el codo"""
+    PB[f"{tn}.001"].rotation_euler = rot1; PB[f"{tn}.002"].rotation_euler = rot2; vl.update()
+arm_bias("T2_BrazoIzq", ARM_BIAS_1, ARM_BIAS_2)
+tent_to("T2_BrazoIzq", chin_point(FACE_DIR, out=0.012)); key_all(3)   # v013: la punta del brazo izquierdo apoyada en la cara bajo la boca, tentáculo curvado hacia arriba
 # 4 guiñando: ojo I cerrado, ceja I bajada, sonrisa
 reset(); lids(180, 0); show("OjoFeliz_I"); brow("I", -0.008, -10); brow("D", 0.010); PB["Cabeza"].rotation_euler.z = D(-6); key_all(4)
 # 5 serio: párpados a medio cerrar, cejas bajas e inclinadas, boca plana, tentáculos cruzados
@@ -780,6 +792,7 @@ for ad in (arm.animation_data, mouth.data.shape_keys.animation_data):
 # ---------------------------------------------------------------- animación idle (bucle de 72 fotogramas a 24 fps)
 act_expr = arm.animation_data.action; act_expr.use_fake_user = True
 act_boca = mouth.data.shape_keys.animation_data.action; act_boca.use_fake_user = True
+mouth.data.shape_keys.animation_data.action = None   # v013: las claves de boca de Idle ya no caen en Expresiones_Boca (que llegaba a 3 s en el .glb)
 arm.animation_data.action = None
 IDLE_LEN = 72; sc.render.fps = 24
 def idle_key(frame): key_all(frame, acc=False)
@@ -800,30 +813,45 @@ for f, ang in ((40, 0), (42, 180), (44, 180), (46, 0)):
 act_idle = arm.animation_data.action; act_idle.name = "Idle"; act_idle.use_fake_user = True
 for fc in all_fcurves(act_idle):
     for kp in fc.keyframe_points: kp.interpolation = 'BEZIER'
+act_idle_boca = mouth.data.shape_keys.animation_data.action; act_idle_boca.name = "Idle_Boca"; act_idle_boca.use_fake_user = True   # v013: la boca de Idle en su propia acción
+mouth.data.shape_keys.animation_data.action = None
 arm.animation_data.action = None; reset(); sc.frame_set(0)
 # pistas NLA: una por acción (el exportador glTF las saca como animaciones separadas)
-def nla_push(id_data, name, action, start=0):
+# v013: cada clip ocupa su propio rango de fotogramas de la escena, para que las pistas de boca (shape keys) puedan estar
+# todas activas a la vez sin pisarse: así el exportador FBX (que hornea la escena por tira) saca la boca correcta de cada clip.
+CLIP_START = {"Expresiones": 0, "Idle": 100, "Saludo": 200, "Idea": 300, "Tecleo": 400, "Relax": 500, "Organizar": 600}
+def clip_frame(name, f): return CLIP_START[name] + f
+def nla_push(id_data, name, action, start=None):
+    if start is None: start = CLIP_START[name]
     ad = id_data.animation_data or id_data.animation_data_create()
     tr = ad.nla_tracks.new(); tr.name = name
-    st = tr.strips.new(name, start, action)
+    st = tr.strips.new(name, start, action); st.extrapolation = 'NOTHING'   # v013: fuera de su rango la tira no suena (los clips van en serie)
     try:
         if hasattr(st, "action_slot") and action.slots: st.action_slot = action.slots[0]
     except Exception as ex: print("slot:", ex)
     tr.mute = False; return tr
 mouth.data.shape_keys.animation_data.action = None
 NLA_EXPR_ARM = nla_push(arm, "Expresiones", act_expr); NLA_EXPR_BOCA = nla_push(mouth.data.shape_keys, "Expresiones", act_boca)
-NLA_IDLE = nla_push(arm, "Idle", act_idle)
-sc.frame_start = 0; sc.frame_end = IDLE_LEN
+NLA_IDLE = nla_push(arm, "Idle", act_idle); NLA_IDLE_BOCA = nla_push(mouth.data.shape_keys, "Idle", act_idle_boca)
+sc.frame_start = 0; sc.frame_end = CLIP_START["Organizar"] + 48
 NT_LUZ = []   # v006: la bombilla apagada/encendida son dos mallas; no se anima ningún material
 def anim_ids():
     return [idd for idd in [arm, mouth.data.shape_keys] + NT_LUZ if idd.animation_data]
 def solo(name):
-    """deja sonando solo la pista NLA indicada (Expresiones, Idle, Saludo, Idea, Tecleo, Relax, Organizar); con name=None, ninguna"""
+    """deja sonando solo la pista NLA indicada (Expresiones, Idle, Saludo, Idea, Tecleo, Relax, Organizar); con name=None, ninguna.
+    v013: los clips viven en rangos distintos (CLIP_START), así que para posar basta goto(); solo() se mantiene por comodidad."""
     for idd in anim_ids():
         for tr in idd.animation_data.nla_tracks:
             tr.is_solo = (tr.name == name)
             tr.mute = (tr.name != name)
     sc.frame_set(sc.frame_current)
+def unmute_all():
+    """todas las pistas activas (estado de entrega: así exportan bien glTF y FBX, cada clip en su rango)"""
+    for idd in anim_ids():
+        for tr in idd.animation_data.nla_tracks: tr.is_solo = False; tr.mute = False
+def goto(name, f):
+    """pone la escena en el fotograma f del clip name (con todas las pistas activas)"""
+    unmute_all(); sc.frame_set(clip_frame(name, f))
 
 # ---------------------------------------------------------------- clips: Saludo, Idea, Tecleo (48 fotogramas, 24 fps)
 def emis(nt):
@@ -936,7 +964,7 @@ def k_organizar(f, u):
 CLIPS = {"Saludo": make_clip("Saludo", 48, k_saludo), "Idea": make_clip("Idea", 48, k_idea), "Tecleo": make_clip("Tecleo", 48, k_tecleo),
          "Relax": make_clip("Relax", 72, k_relax), "Organizar": make_clip("Organizar", 48, k_organizar)}
 print("clips:", CLIPS)
-solo("Idle")
+unmute_all(); sc.frame_set(clip_frame("Idle", 0))
 
 # ---------------------------------------------------------------- cámaras, luces, render
 def cam(name, loc, rot, ortho=True, scale=1.3):
@@ -1061,4 +1089,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v012 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v013 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
