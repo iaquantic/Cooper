@@ -29,3 +29,14 @@ SOLICITUD-MODELADOR-3D.md   Pedido al Modelador 3D
 
 - Los archivos de `modelo/` se copian tal cual. Cooper no se redibuja ni se regenera con IA en cada proyecto: siempre se parte de este modelo.
 - Si un proyecto necesita una pose, expresión o formato que no existe, se pide al Modelador 3D y se añade aquí como versión nueva.
+
+## Archivos grandes (Git LFS)
+
+Desde la v013, los `.glb`, `.fbx`, `.blend` y `.png` se guardan con Git LFS (ver `.gitattributes`). El
+repositorio solo guarda una referencia y el archivo real se descarga aparte. Así, cada versión nueva no
+engorda el historial.
+
+- Para clonar o actualizar el repositorio hace falta tener Git LFS instalado. Git para Windows ya lo trae.
+  Si al abrir un `.glb` o un `.png` sale un archivo de texto pequeño en lugar del modelo o la imagen,
+  ejecuta `git lfs install` y luego `git lfs pull`.
+- Las versiones hasta la v012 siguen en el historial normal de Git.
