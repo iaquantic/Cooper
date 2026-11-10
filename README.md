@@ -11,6 +11,13 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 | Personalidad y características | Definidas el 2026-11-06 (`personaje/FICHA.md`) | Aspecto: Modelador 3D · Personalidad: Quantic |
 | Modelo 3D | Entregado el 2026-11-10, versión v014 (v013 aprobada + colores oficiales de marca y logo oficial en sudadera, portátil y taza); notas en `modelo/NOTAS.md` | Modelador 3D |
 
+## Pendientes
+
+- **v015, sin enviar todavía:** el bolsillo y los cordones de la sudadera tapan parte del logo del pecho, y la
+  comparación de bocas sigue con los colores antiguos. El pedido está preparado en `SOLICITUD-MODELADOR-3D.md`.
+- **Logo:** se usa la versión blanca de letras estilizadas, la misma que la web publicada. La página del manual
+  de marca muestra «Quantic» con letras normales. Falta confirmar cuál es el oficial.
+
 ## Estructura
 
 ```
