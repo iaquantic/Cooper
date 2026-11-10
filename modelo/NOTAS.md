@@ -74,6 +74,12 @@ lados con la mano asomando por el puño) y solo sube en su clip de modo.
 `Acc_Panel` · `Saludo` → ninguno. `Expresiones` e `Idle` no tocan la visibilidad. `Acc_Movil` solo por código.
 
 ## Pendiente
+- Revisión de Quantic: en `3 pensativo` la mano sigue sin tocar la cara. Queda a la altura del cuello de la
+  sudadera, por debajo y por delante de la boca, tanto en el render como en el `.glb`. En la hoja la punta
+  del tentáculo se apoya en la cara, justo debajo de la boca.
+- Revisión de Quantic: en el `.glb`, la animación `Expresiones` no lleva las bocas. El canal `Boca.weights`
+  tiene dos claves en 0 (de 0 a 3 s), así que sorprendido, pensativo y serio salen con la boca por defecto
+  (sonrisa abierta), a diferencia de los renders. Además, ese canal hace que el clip dure 3 s en vez de 0,25 s.
 - Confirmar los hex oficiales con la guía de marca de Quantic y, si difieren, rehornear las texturas.
 - El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia `Idea`; en reposo está encendida.
 - Las mangas nacen dentro del cuerpo de la sudadera; si un brazo se lleva muy atrás por código, la manga
