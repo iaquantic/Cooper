@@ -1,4 +1,10 @@
-# Cooper (mascota Quantic) — construcción v013 (Blender 5.2, ejecutar dentro de Blender)
+# Cooper (mascota Quantic) — construcción v014 (Blender 5.2, ejecutar dentro de Blender)
+# v014 (colores oficiales de Quantic, personaje/marca/README.md del repo): cuerpo, cabeza y tentáculos en el violeta de marca
+# #8070E7 (antes #5B2BE0); manchas #564CA3 e iris #564EA1 (mismo salto de tono). Logo oficial (Q con barra violeta, versión
+# blanca) como textura con alfa: en el pecho (quantic-logo-blanco.png envuelto a la sudadera), en la tapa del portátil
+# (quantic-isotipo-blanco.png) y en la taza (taza.png regenerada con el logo). Pantallas, ventosas, ojos, gafas, sudadera,
+# bombilla, boca, geometría, brazos, animaciones, Acc_* y visibilidad: sin cambios. Cabeza y cuerpo rehorneados; normales de
+# la sudadera reutilizadas (reuse_hoodie).
 # v013 (revisión de Quantic de la v012): (1) en 3 pensativo la punta del brazo izquierdo se apoya en la cara, bajo la
 # boca y a la izquierda, con el tentáculo curvado hacia arriba (face_point sobre el elipsoide de la cabeza, con pose
 # inicial del brazo que lleva el codo abajo); (2) las bocas de Expresiones en el .glb/.fbx: la acción Expresiones_Boca
@@ -26,7 +32,7 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v013"
+BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v014"
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -112,16 +118,16 @@ def mat(name, hexcol, rough=0.5, emit=0.0, metal=0.0, emit_hex=None, bump=0.0, p
     m.diffuse_color = col
     return m
 M = {
-    'cuerpo':   mat('Q_Cuerpo',    '#5B2BE0', 0.5, bump=0.3, pores=1.2),           # cuerpo y tentáculos: poros suaves
-    'cabeza':   mat('Q_Cabeza',    '#5B2BE0', 0.5, bump=0.4, pores=7.0, spots_hex='#3A1A9E'),   # cabeza: poros marcados y manchas procedurales
-    'manchas':  mat('Q_Manchas',   '#3A1A9E', 0.55, bump=0.3, pores=3.0, fade_to='#5B2BE0'),
+    'cuerpo':   mat('Q_Cuerpo',    '#8070E7', 0.5, bump=0.3, pores=1.2),   # v014: violeta de marca           # cuerpo y tentáculos: poros suaves
+    'cabeza':   mat('Q_Cabeza',    '#8070E7', 0.5, bump=0.4, pores=7.0, spots_hex='#564CA3'),   # cabeza: poros marcados y manchas procedurales
+    'manchas':  mat('Q_Manchas',   '#564CA3', 0.55, bump=0.3, pores=3.0, fade_to='#8070E7'),
     'vidrio_off': mat('Q_VidrioOff', '#B8AA7E', 0.35),
     'filamento_off': mat('Q_FilamentoOff', '#5A4A2E', 0.5),
     'ventosas': mat('Q_Ventosas',  '#E8A8C8', 0.55),
     'ventosa_in': mat('Q_VentosaCentro', '#C98AB0', 0.6),
     'ojo':      mat('Q_OjoBlanco', '#FFFFFF', 0.2),
     'pupila':   mat('Q_Pupila',    '#0A0A14', 0.15),
-    'iris':     mat('Q_Iris',      '#3B1E9C', 0.25),
+    'iris':     mat('Q_Iris',      '#564EA1', 0.25),
     'pestana':  mat('Q_Pestana',   '#1A0A4E', 0.4),
     'dientes':  mat('Q_Dientes',   '#F4F4F8', 0.3),
     'gafas':    mat('Q_Gafas',     '#101014', 0.3),
@@ -302,14 +308,9 @@ seams.append(torus("Costura_Bajo", (0, 0, 0.300), 0.173, 0.003, m=M['costura'], 
 seams.append(torus("Costura_Cuello", (0, 0.02, 0.527), 0.138, 0.003, m=M['costura'], rot=(0.25, 0, 0), maj=64, mino=6))
 seams.append(torus("Costura_Capucha", (0, 0.145, 0.60), 0.085, 0.003, m=M['costura'], rot=(0, math.pi / 2, 0), maj=48, mino=6))   # costura central de la capucha
 seams[-1].scale = (1.0, 1.0, 0.75)
-ring = torus("Logo_Anillo", (-0.066, -0.181, 0.385), 0.019, 0.0045, m=M['cian'], rot=(math.pi / 2, 0, 0))
-qb = cube("Logo_Q_Cola", (-0.053, -0.181, 0.371), (0.013, 0.006, 0.005), M['cian'], rot=(0, 0.6, 0))
-bpy.ops.object.text_add(location=(-0.040, -0.183, 0.370)); t = bpy.context.active_object
-t.name = "Logo_Texto"; t.data.body = "Quantic"; t.data.size = 0.032; t.data.extrude = 0.003
-t.data.align_x = 'LEFT'; t.rotation_euler = (math.pi / 2, 0, 0); t.data.materials.append(M['blanco']); link(t, C_CHAR)
-bpy.ops.object.select_all(action='DESELECT'); t.select_set(True); vl.objects.active = t; bpy.ops.object.convert(target='MESH')
+# v014: el logo del pecho ya no es geometría (aro cian + texto): es el logo oficial como textura, ver Logo_Sudadera más abajo
 for n in ("Sudadera", "Sudadera_Cuello", "Sudadera_Capucha", "Sudadera_Bajo", "Cordon_I", "Cordon_D", "Cordon_Punta_I",
-          "Cordon_Punta_D", "Sudadera_Bolsillo", "Logo_Anillo", "Logo_Q_Cola", "Logo_Texto") + tuple(sm.name for sm in seams):
+          "Cordon_Punta_D", "Sudadera_Bolsillo") + tuple(sm.name for sm in seams):
     parent_keep(bpy.data.objects[n], body)
 
 # ---------------------------------------------------------------- tentáculos
@@ -448,11 +449,21 @@ def screen_plane(name, center, size, rot_matrix, m, c=C_ACC):
     bpy.ops.mesh.primitive_plane_add(size=1, location=center); o = bpy.context.active_object; o.name = name
     o.scale = (size[0], size[1], 1); o.rotation_euler = (rot_matrix @ Matrix.Rotation(math.pi / 2, 4, 'X')).to_euler()
     o.data.materials.append(m); link(o, c); return o
+# v014: logo oficial de Quantic en el pecho (personaje/marca/quantic-logo-blanco.png): rejilla con la textura con alfa, envuelta
+# a la sudadera con Shrinkwrap; mismo ancho que el logo anterior (aro + «Quantic», de x=-0,085 a +0,075) y 1 cm más alto
+LOGO_W = 0.160; LOGO_H = LOGO_W * 758 / 3546
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=24, y_subdivisions=6, size=1, location=(-0.005, -0.181, 0.395))   # 1 cm más alto que el logo anterior: así queda entero por encima del bolsillo y su costura
+logo = bpy.context.active_object; logo.name = "Logo_Sudadera"; logo.scale = (LOGO_W, LOGO_H, 1); logo.rotation_euler = (math.pi / 2, 0, 0)
+logo.data.materials.append(screen_mat('Q_LogoSudadera', 'quantic-logo-blanco.png', emit=0.0, rough=0.55, alpha=True)); link(logo, C_CHAR)
+sw = logo.modifiers.new("Envolver", 'SHRINKWRAP'); sw.target = hood; sw.wrap_method = 'NEAREST_SURFACEPOINT'; sw.offset = 0.005
+parent_keep(logo, body)
 R_lid = Matrix.Rotation(0.15, 4, 'Z') @ Matrix.Rotation(-0.25, 4, 'X')
 # la pantalla mira al teclado (+Y local de la tapa); la cara hacia el espectador es la trasera, con el logo Q
 l_scr = screen_plane("Laptop_Pantalla", Vector((lx - 0.01, ly - 0.062, lz + 0.06)) + (R_lid @ Vector((0, 0.0045, 0))), (0.165, 0.108),
                      R_lid @ Matrix.Rotation(math.pi, 4, 'Z'), screen_mat('Q_PantallaLaptop', 'pantalla_laptop.png'))
-l_q = torus("Laptop_LogoQ", (lx, ly - 0.069, lz + 0.06), 0.022, 0.004, M['cian'], rot=(math.pi / 2 - 0.25, 0, 0.15), c=A)
+ISO_W = 0.050; ISO_H = ISO_W * 1407 / 1490   # v014: isotipo oficial (personaje/marca/quantic-isotipo-blanco.png) en la cara trasera de la tapa
+l_q = screen_plane("Laptop_LogoQ", Vector((lx - 0.01, ly - 0.062, lz + 0.06)) + (R_lid @ Vector((0, -0.0048, 0))), (ISO_W, ISO_H), R_lid,
+                   screen_mat('Q_LogoLaptop', 'quantic-isotipo-blanco.png', emit=0.0, rough=0.55, alpha=True), c=A)
 l_kb = cube("Laptop_Teclado", (lx, ly + 0.01, lz + 0.005), (0.15, 0.08, 0.003), M['negro'], rot=(0, 0, 0.15), c=A)
 l_hinge = cyl("Laptop_Bisagra", (lx - 0.005, ly - 0.060, lz), 0.006, 0.17, M['negro'], rot=(0, math.pi / 2, 0.15), verts=12, c=A)
 Rz = Matrix.Rotation(0.15, 4, 'Z')
@@ -1053,8 +1064,8 @@ def bake_hoodie(size=1024, samples=8):
 def bake_finish():
     """asigna los materiales de imagen a partir de lo horneado (o de las imágenes ya cargadas)"""
     def img(name): return BAKED.get(name.split('_')[0].lower(), (None, None))
-    c, n = BAKED["cabeza"]; m_cab = _baked_material("Q_Cabeza_Horneada", '#5B2BE0', c, n, 0.5)
-    c, n = BAKED["cuerpo"]; m_cue = _baked_material("Q_Cuerpo_Horneada", '#5B2BE0', c, n, 0.5)
+    c, n = BAKED["cabeza"]; m_cab = _baked_material("Q_Cabeza_Horneada", '#8070E7', c, n, 0.5)
+    c, n = BAKED["cuerpo"]; m_cue = _baked_material("Q_Cuerpo_Horneada", '#8070E7', c, n, 0.5)
     _, n = BAKED["sudadera"]; m_sud = _baked_material("Q_Sudadera_Horneada", '#0E1424', None, n, 0.9)
     for o in HEAD:
         for sl in o.material_slots: sl.material = m_cab
@@ -1073,6 +1084,11 @@ def reuse_head(src_dir):
         img = bpy.data.images.load(os.path.join(src_dir, fn)); img.name = fn.replace(".png", "")
         img.colorspace_settings.name = 'sRGB' if color else 'Non-Color'; return img
     BAKED["cabeza"] = (load("cabeza_color.png", True), load("cabeza_normal.png", False)); print("cabeza reutilizada de", src_dir)
+def reuse_hoodie(src_dir):
+    """v014: la sudadera no cambia; se desenvuelve igual y se carga su normal. Cabeza y cuerpo (color nuevo) se hornean de nuevo."""
+    _unwrap(HOODIE, margin=0.006)
+    img = bpy.data.images.load(os.path.join(src_dir, "sudadera_normal.png")); img.name = "sudadera_normal"; img.colorspace_settings.name = 'Non-Color'
+    BAKED["sudadera"] = (None, img); print("sudadera reutilizada de", src_dir)
 def bake_reuse(src_dir):
     """mismo desenvuelto que el horneado (determinista para la misma geometría) y texturas ya horneadas de otra versión"""
     _unwrap(HEAD, margin=0.006); _unwrap(BODY, margin=0.004); _unwrap(HOODIE, margin=0.006)
@@ -1089,4 +1105,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v013 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v014 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))

@@ -1,73 +1,60 @@
-# Cooper v013 — notas de la versión
+# Cooper v014 — notas de la versión
 
-**Fecha:** 2026-11-10 · **Parte de:** v012 (taza de Relax aprobada) · **Pedido:** Quantic, dos arreglos
-(`SOLICITUD-MODELADOR-3D.md`): la mano en la cara en `3 pensativo` y las bocas de `Expresiones` en el `.glb` y el `.fbx`.
+**Fecha:** 2026-11-10 · **Parte de:** v013 (aprobada) · **Pedido:** Quantic, colores oficiales de marca y logo oficial
+(`SOLICITUD-MODELADOR-3D.md`; colores y logos en `personaje/marca/`).
 
 Archivos de esta versión en el repositorio `iaquantic/Cooper`:
 
 | Archivo | Qué es |
 |---|---|
-| `modelo/blend/cooper_v013.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
-| `modelo/blend/build_v013.py` | Script que reconstruye Cooper desde cero; `bake_reuse(dir)` carga las texturas ya horneadas (las de v011, sin cambios). |
-| `modelo/web/cooper_v013.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas, esqueleto de 55 huesos, shape keys y las 7 animaciones **con las bocas**. |
-| `modelo/animacion/cooper_v013_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
+| `modelo/blend/cooper_v014.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
+| `modelo/blend/build_v014.py` | Script que reconstruye Cooper desde cero; `reuse_hoodie(dir)` + `bake_head()` + `bake_body()` + `bake_finish()` hornean la piel con los colores nuevos. |
+| `modelo/web/cooper_v014.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas (logos de marca incluidos), esqueleto de 55 huesos, shape keys y las 7 animaciones con las bocas. |
+| `modelo/animacion/cooper_v014_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
 | `modelo/renders/modos/` | PNG 1600 × 2000 con fondo transparente, un accesorio por modo (de frente y de tres cuartos), sin accesorios y saludando. |
 | `modelo/renders/expresiones/` | Las siete expresiones, sin accesorios, con el mismo encuadre. |
-| `modelo/renders/comparacion/` | Comparaciones con la hoja de personaje y `bocas_glb_fbx_vs_renders.png` (renders frente a `.glb` y `.fbx` importados). |
+| `modelo/renders/comparacion/` | Comparaciones con la hoja de personaje y `bocas_glb_fbx_vs_renders.png` (de v013, sin cambios en las bocas). |
 
-Colores, proporciones, rasgos, mangas y brazos, reparto de accesorios, nombres `Acc_*`, visibilidad por modo y
-texturas: **iguales que en v012**. Cambian una pose y la forma de exportar las bocas.
+Geometría, brazos, animaciones, reparto de accesorios, nombres `Acc_*`, visibilidad por modo, pantallas, ventosas, ojos,
+gafas, sudadera, bombilla y boca: **iguales que en v013**. Cambian los colores de la piel y los tres logos.
 
-## Qué cambió respecto a v012
+## Qué cambió respecto a v013
 
-### 1. La mano toca la cara en `3 pensativo`
-El punto "bajo la barbilla" de v012 caía dentro del cuello de la sudadera. Ahora la punta del brazo izquierdo se
-apoya en la **parte delantera de la cara, justo debajo de la boca y a la izquierda** (`FACE_DIR` sobre el elipsoide
-de la cabeza, más 1,2 cm de radio de la mano), y el tentáculo sube **curvado hacia arriba** desde la manga: antes de
-resolver el IK se da una pose inicial a los dos primeros huesos del brazo (`ARM_BIAS_1/2`) que lleva el codo abajo,
-y el solucionador parte de ahí. Medido: punta en (−0,057, −0,149, 0,457) m con la boca en (−0,004, −0,151, 0,484)
-m: 5,3 cm a la izquierda y 2,7 cm por debajo de la boca, sobre la piel. Comprobado de frente, de tres cuartos y de
-perfil; la boca (puchero) queda libre.
+### 1. Violeta de marca en cuerpo, cabeza y tentáculos
+Decisión de Quantic, con los hex del manual de marca (`personaje/marca/README.md`):
 
-### 2. Las bocas de `Expresiones` en el `.glb` y el `.fbx`
-Dos causas, las dos en el script:
-- La acción `Expresiones_Boca` arrastraba las claves de boca de `Idle` (todas en 0, hasta el fotograma 72): por
-  eso el clip duraba 3 s. Ahora `Idle` tiene su propia `Idle_Boca` y `Expresiones_Boca` va de 0 a 6.
-- Al exportar, las pistas NLA de las shape keys estaban silenciadas (el estado en que las deja `solo()` para
-  renderizar), y el exportador glTF las hornea con sus ceros. Ahora el estado de entrega es **todas las pistas
-  activas** (`unmute_all()`), y para que no se pisen **cada clip ocupa su propio rango de fotogramas** de la escena
-  (`CLIP_START`: Expresiones 0, Idle 100, Saludo 200, Idea 300, Tecleo 400, Relax 500, Organizar 600; tiras con
-  extrapolación "nada"). Así también el exportador FBX, que hornea la escena tira a tira, saca la boca correcta
-  de cada toma. En el `.glb` cada animación empieza en 0 s (`export_anim_slide_to_zero`).
-- El canal de pesos de `Expresiones` en el `.glb` se escribe con interpolación **STEP** (el exportador siempre
-  pone LINEAR en shape keys; se corrige en el posproceso del archivo), 7 claves de 0 a 0,25 s, como los huesos.
-
-Comprobación, importando los archivos exportados en un Blender limpio (`glbcheck/check_bocas.py`):
-
-| Fotograma de `Expresiones` | Shape keys esperadas | `.glb` | `.fbx` |
+| Elemento | v013 | v014 | Motivo |
 |---|---|---|---|
-| 0 neutro | ninguna | ninguna | ninguna |
-| 1 feliz | Risa 0,35 | Risa 0,35 | Risa 0,35 |
-| 2 sorprendido | O 1,0 | O 1,0 | O 1,0 |
-| 3 pensativo | Puchero 1,0 | Puchero 1,0 | Puchero 1,0 |
-| 4 guiñando | ninguna | ninguna | ninguna |
-| 5 serio | Plano 1,0 | Plano 1,0 | Plano 1,0 |
-| 6 risa | Risa 1,0 | Risa 1,0 | Risa 1,0 |
+| Cuerpo, cabeza y tentáculos | `#5B2BE0` | **`#8070E7`** | violeta oficial de Quantic |
+| Manchas de la cabeza | `#3A1A9E` | **`#564CA3`** | el mismo salto de tono aplicado al violeta nuevo, tal como propuso Quantic |
+| Iris | `#3B1E9C` | **`#564EA1`** | ídem |
 
-Duración de `Expresiones` en el `.glb`: 0,000–0,250 s (ningún canal más largo). El resto de clips también lleva su
-boca: `Saludo` f24 Risa 0,30 · `Idea` f36 Risa 0,35 · `Tecleo` f24 ninguna · `Relax` f30 O 0,5 · `Organizar` f32
-Risa 0,35 · `Idle` ninguna, iguales en `.glb` y `.fbx` que en Blender. La hoja
-`modelo/renders/comparacion/bocas_glb_fbx_vs_renders.png` pone las siete expresiones renderizadas desde Blender,
-desde el `.glb` importado y desde el `.fbx` importado, una fila cada uno.
+Se dejaron los hex propuestos sin retocar: con la iluminación de los renders las manchas siguen distinguiéndose
+(más suaves que antes, porque el violeta nuevo es más claro y el contraste relativo es el mismo) y el iris se lee
+bien dentro del blanco del ojo. Las texturas de **cabeza y cuerpo se hornearon de nuevo** (color y normales
+2048²); las normales de la sudadera se reutilizan (`reuse_hoodie`). Ventosas, boca, bombilla, pantallas: sin cambio.
 
-**Para quien use el `.blend`:** las tiras van en serie en la línea de tiempo (ver `CLIP_START`). Para posar o
-renderizar un clip, `solo(nombre)` + `sc.frame_set(clip_frame(nombre, f))`, o `goto(nombre, f)` con todas las
-pistas activas. Con todas activas, fuera del rango de los clips de modo los huesos `Acc_*` vuelven a su valor por
-defecto (visibles): es lo esperado en `Expresiones` e `Idle`, que no fijan la visibilidad.
+### 2. Logo oficial en la sudadera, el portátil y la taza
+Los archivos de `personaje/marca/` se usan tal cual, como texturas con transparencia (aro y letras blancos
+`#FFFFFF`, barra diagonal `#8070E7`):
 
-Renders regenerados: `cooper_expresion_3_pensativo.png`, la comparación de expresiones (y las otras dos
-comparaciones, por el rótulo de versión). El resto de renders no cambia. Exportaciones regeneradas: `.blend`,
-`.glb` y `.fbx`.
+| Dónde | Archivo | Cómo | Tamaño y sitio |
+|---|---|---|---|
+| Pecho de la sudadera | `quantic-logo-blanco.png` | objeto `Logo_Sudadera`: rejilla con la textura, envuelta a la sudadera con Shrinkwrap (5 mm por delante de la tela), material mate | mismo ancho que el logo anterior (16 cm); **1 cm más alto** (centro a 0,395 m en vez de 0,385), porque el logo anterior era geometría que flotaba delante del bolsillo y una textura pegada a la tela quedaba tapada por el bolsillo y su costura |
+| Tapa del portátil | `quantic-isotipo-blanco.png` | objeto `Laptop_LogoQ`: plano con la textura en la cara trasera de la tapa | mismo sitio y diámetro (5 cm) que el aro anterior |
+| Taza | `quantic-logo-blanco.png` | textura `taza.png` regenerada (1024 × 512, fondo `#15151C`): el logo ocupa la misma franja que el «Q Quantic» anterior (425 px de ancho, centrado al frente) | igual que antes |
+
+El logo anterior (aro cian con «Quantic», objetos `Logo_Anillo`, `Logo_Q_Cola` y `Logo_Texto`, y el aro
+`Laptop_LogoQ` cian) desaparece. El cian `#22D3EE` queda solo en las pantallas, por decisión de Quantic.
+En los renders de frente y de busto el logo del pecho se lee entero («Quantic» con la Q de barra violeta).
+
+### 3. Lo que no cambia
+Pantallas del portátil, del móvil y del panel (azul `#1A6FFF` y cian `#22D3EE`), ventosas, ojos, gafas, sudadera,
+bombilla, boca, geometría, brazos, animaciones, nombres `Acc_*` y visibilidad por modo.
+
+### 4. Entrega
+Todos los renders regenerados (modos, expresiones y comparaciones) y las tres exportaciones. `personaje/FICHA.md`
+con la tabla de colores nueva y sin el pendiente de confirmar los hex. Archivos binarios por Git LFS.
 
 ## Reparto de accesorios y brazos (sin cambios desde v011)
 
@@ -94,8 +81,11 @@ comparaciones, por el rótulo de versión). El resto de renders no cambia. Expor
 `Idea` → `Acc_Bombilla` · `Tecleo` → `Acc_Laptop` · `Relax` → `Acc_Taza` · `Organizar` → `Acc_Checklist` y
 `Acc_Panel` · `Saludo` → ninguno. `Expresiones` e `Idle` no tocan la visibilidad. `Acc_Movil` solo por código.
 
+**Para quien use el `.blend`:** las tiras van en serie en la línea de tiempo (`CLIP_START`: Expresiones 0, Idle 100,
+Saludo 200, Idea 300, Tecleo 400, Relax 500, Organizar 600). Para posar o renderizar un clip, `solo(nombre)` +
+`sc.frame_set(clip_frame(nombre, f))`, o `goto(nombre, f)` con todas las pistas activas.
+
 ## Pendiente
-- Confirmar los hex oficiales con la guía de marca de Quantic y, si difieren, rehornear las texturas.
 - El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia `Idea`; en reposo está encendida.
 - Las mangas nacen dentro del cuerpo de la sudadera; si un brazo se lleva muy atrás por código, la manga
   puede asomar por la espalda. Los clips entregados no lo hacen.
@@ -103,12 +93,11 @@ comparaciones, por el rótulo de versión). El resto de renders no cambia. Expor
 ## Qué se infirió
 - Igual que en versiones anteriores: toda la geometría sale de una hoja de personaje raster sin escala
   real; la altura de 1,000 m es decisión nuestra y el grosor de cada pieza se dedujo de las vistas.
-- El punto exacto de apoyo de la mano en la cara (5 cm a la izquierda y 3 cm bajo la boca) y la curva del brazo
-  son decisiones de pose del Modelador 3D; el pedido fija que toque la cara bajo la boca, a la izquierda, con el
-  tentáculo curvado hacia arriba y sin tapar la boca.
-- Los rangos de fotogramas por clip (de 100 en 100) son una convención del archivo de trabajo; los exportados
-  empiezan todos en 0.
+- Los hex de manchas e iris son los que propuso Quantic (mismo salto de tono); el Modelador 3D comprobó en
+  los renders que se distinguen y no los retocó.
+- Que el logo del pecho suba 1 cm es decisión del Modelador 3D para que la textura no quede tapada por el
+  bolsillo; el ancho se mantiene.
 
 ## Medidas (sin cambios)
-Alto 1,000 m, ancho 0,80 m, fondo 0,65 m en reposo con todos los accesorios en alto; topología 28 446 quads,
-1 604 triángulos y 63 n-gonos; 55 huesos.
+Alto 1,000 m, ancho 0,80 m, fondo 0,65 m en reposo con todos los accesorios en alto; topología 27 198 quads,
+388 triángulos y 63 n-gonos (menos que en v013 porque el logo del pecho ya no es geometría); 55 huesos.
