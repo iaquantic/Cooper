@@ -86,6 +86,11 @@ Saludo 200, Idea 300, Tecleo 400, Relax 500, Organizar 600). Para posar o render
 `sc.frame_set(clip_frame(nombre, f))`, o `goto(nombre, f)` con todas las pistas activas.
 
 ## Pendiente
+- Revisión de Quantic: el borde del bolsillo canguro (el aro de la sudadera) pasa por encima de la parte
+  baja del logo del pecho y tapa la barra violeta de la Q y el pie de las letras, en los renders y en el
+  `.glb`. Los extremos de los cordones también pisan la parte alta del logo.
+- Revisión de Quantic: `modelo/renders/comparacion/bocas_glb_fbx_vs_renders.png` es de v013 y muestra los
+  colores y el logo antiguos.
 - El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia `Idea`; en reposo está encendida.
 - Las mangas nacen dentro del cuerpo de la sudadera; si un brazo se lleva muy atrás por código, la manga
   puede asomar por la espalda. Los clips entregados no lo hacen.

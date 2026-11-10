@@ -99,7 +99,7 @@ ocupan un 40 % del diámetro de la cabeza y quedan casi pegados bajo el puente d
 
 ### Rasgos que lo hacen reconocible
 - Cabeza esférica morada con **poros** y **manchas** más oscuras, concentradas en la cabeza.
-- **Ojos grandes y juntos**, blancos con iris morado y pupila negra, tras unas **gafas de montura gruesa
+- **Ojos grandes y juntos**, blancos con iris violeta y pupila negra, tras unas **gafas de montura gruesa
   tipo wayfarer** con puente corto.
 - **Sudadera** azul marino con capucha, cordones, bolsillo canguro, **mangas con puño**, costuras y el
   **logo oficial de Quantic** (Q con barra violeta, versión blanca) en el pecho.
