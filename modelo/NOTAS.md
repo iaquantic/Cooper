@@ -1,60 +1,99 @@
-# Cooper v014 — notas de la versión
+# Cooper v015 — notas de la versión
 
-**Fecha:** 2026-11-10 · **Parte de:** v013 (aprobada) · **Pedido:** Quantic, colores oficiales de marca y logo oficial
-(`SOLICITUD-MODELADOR-3D.md`; colores y logos en `personaje/marca/`).
+**Fecha:** 2026-11-12 · **Parte de:** v014 · **Pedido:** Quantic, revisión de la v014: el logo del pecho tapado por el bolsillo y
+los cordones, y la comparación de bocas antigua (`SOLICITUD-MODELADOR-3D.md`).
 
 Archivos de esta versión en el repositorio `iaquantic/Cooper`:
 
 | Archivo | Qué es |
 |---|---|
-| `modelo/blend/cooper_v014.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
-| `modelo/blend/build_v014.py` | Script que reconstruye Cooper desde cero; `reuse_hoodie(dir)` + `bake_head()` + `bake_body()` + `bake_finish()` hornean la piel con los colores nuevos. |
-| `modelo/web/cooper_v014.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas (logos de marca incluidos), esqueleto de 55 huesos, shape keys y las 7 animaciones con las bocas. |
-| `modelo/animacion/cooper_v014_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
+| `modelo/blend/cooper_v015.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
+| `modelo/blend/build_v015.py` | Script que reconstruye Cooper desde cero; `bake_reuse(dir)` con las texturas de v014 (ni la piel ni la sudadera cambian). La variable de entorno `COOPER_BASE` permite indicar la carpeta de la versión fuera del PC de trabajo. |
+| `modelo/web/cooper_v015.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas (logos de marca incluidos), esqueleto de 55 huesos, shape keys y las 7 animaciones con las bocas. |
+| `modelo/animacion/cooper_v015_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
 | `modelo/renders/modos/` | PNG 1600 × 2000 con fondo transparente, un accesorio por modo (de frente y de tres cuartos), sin accesorios y saludando. |
 | `modelo/renders/expresiones/` | Las siete expresiones, sin accesorios, con el mismo encuadre. |
-| `modelo/renders/comparacion/` | Comparaciones con la hoja de personaje y `bocas_glb_fbx_vs_renders.png` (de v013, sin cambios en las bocas). |
+| `modelo/renders/comparacion/` | Comparaciones con la hoja de personaje y `bocas_glb_fbx_vs_renders.png` (renders frente a `.glb` y `.fbx` importados), las cuatro de v015. |
 
-Geometría, brazos, animaciones, reparto de accesorios, nombres `Acc_*`, visibilidad por modo, pantallas, ventosas, ojos,
-gafas, sudadera, bombilla y boca: **iguales que en v013**. Cambian los colores de la piel y los tres logos.
+Colores, logos del portátil y de la taza, geometría, brazos, animaciones, reparto de accesorios, nombres `Acc_*` y
+visibilidad por modo: **iguales que en v014**. Cambian solo el sitio del logo del pecho, la costura del bolsillo y el
+largo de los cordones.
 
-## Qué cambió respecto a v013
+## Qué cambió respecto a v014
 
-### 1. Violeta de marca en cuerpo, cabeza y tentáculos
-Decisión de Quantic, con los hex del manual de marca (`personaje/marca/README.md`):
+Medidas en metros, en coordenadas de Blender (Z arriba, suelo en 0), con Cooper en reposo. En el `.glb` la Z de
+Blender es la Y.
 
-| Elemento | v013 | v014 | Motivo |
+### 1. El aro sobre el logo era la costura del bolsillo, mal escalada
+El «aro» que tapaba la barra violeta de la Q y el pie de las letras es la costura del bolsillo canguro
+(`Costura_Bolsillo`). Tenía que seguir el borde del bolsillo al 82 % de su tamaño, pero el script la escalaba en el
+eje equivocado (el 0,6 caía en la profundidad y no en la altura), así que era una elipse tan alta como ancha que
+asomaba 2 cm por encima del bolsillo, flotando delante del logo, y 2 cm por debajo. Ahora sigue el bolsillo en ancho
+y en alto (`scale (1.4, 0.6, 0.6)` en el script) y queda medio hundida en su cara delantera, como el resto de costuras.
+
+| `Costura_Bolsillo` | v014 | v015 |
+|---|---|---|
+| Ancho | 0,184 | 0,184 (igual) |
+| Alto | 0,131 (z 0,239–0,371) | **0,079** (z 0,265–0,344) |
+| Borde superior frente al del bolsillo (z 0,351) | 2,0 cm por encima | 0,7 cm por debajo |
+
+### 2. El logo sube 1,5 cm
+Mismo tamaño (13,2 × 2,9 cm sobre la tela) y mismo archivo; solo cambia la altura, para dejar margen sobre el bolsillo.
+
+| `Logo_Sudadera` | v014 | v015 |
+|---|---|---|
+| Altura (z) | 0,3445–0,3731 | **0,3594–0,3879** |
+| Centro del plano en el script, antes de envolverlo a la tela | 0,395 | 0,4117 (`LOGO_Z`) |
+
+Además, la textura del logo se muestrea con extensión **EXTEND** (en el `.glb`, `CLAMP_TO_EDGE`; el `.fbx` también la
+conserva). El logo toca los cuatro bordes de `quantic-logo-blanco.png` y con la repetición por defecto el filtrado
+traía el pie de las letras al borde superior: salían unas rayitas sobre «Quantic» (también en v014). El archivo de
+marca no se toca.
+
+### 3. Cordones más cortos
+Cada cordón pierde 3,5 cm por abajo; el arranque en el cuello no se mueve y la punta sube con él.
+
+| Cordones (`Cordon_I/D`, `Cordon_Punta_I/D`) | v014 | v015 |
+|---|---|---|
+| Largo de la cuerda | 0,067 (z 0,379–0,447) | **0,032** (z 0,414–0,447) |
+| Punta (z) | 0,365–0,383 | **0,400–0,418** |
+| En el script | `CORD_SHORTEN` no existía | `CORD_SHORTEN = 0,0394` (unidades del script, antes de escalar a 1 m) |
+
+### 4. Márgenes del logo
+
+| Margen | v014 | v015 |
+|---|---|---|
+| Logo sobre el borde del bolsillo (z 0,351) | −0,6 cm (el bolsillo llegaba más arriba que el pie del logo) | **0,9 cm** |
+| Logo sobre la costura del bolsillo | −2,6 cm (la costura cruzaba el logo) | **1,5 cm** |
+| Puntas de los cordones sobre el logo | −0,8 cm (las puntas pisaban el logo) | **1,2 cm** |
+
+Comprobado de frente, de tres cuartos y en los bustos de las expresiones (renders de Blender), en el `.glb`
+importado en un Blender limpio y cargado en three.js, y en el `.fbx` importado. El logo se ve entero en todas las
+vistas salvo donde lo tapa la pose, igual que en v014: en **5 serio** los brazos cruzados van delante del pecho (como
+en la hoja de personaje) y en **Trabajo** el portátil está delante del pecho.
+
+### 5. Comparación de bocas al día
+`modelo/renders/comparacion/bocas_glb_fbx_vs_renders.png` se regenera con la v015: las siete expresiones
+renderizadas desde Blender, desde el `.glb` importado y desde el `.fbx` importado, una fila cada uno. Las bocas
+coinciden en las tres filas:
+
+| Fotograma de `Expresiones` | Shape keys | `.glb` | `.fbx` |
 |---|---|---|---|
-| Cuerpo, cabeza y tentáculos | `#5B2BE0` | **`#8070E7`** | violeta oficial de Quantic |
-| Manchas de la cabeza | `#3A1A9E` | **`#564CA3`** | el mismo salto de tono aplicado al violeta nuevo, tal como propuso Quantic |
-| Iris | `#3B1E9C` | **`#564EA1`** | ídem |
+| 0 neutro | ninguna | ninguna | ninguna |
+| 1 feliz | Risa 0,35 | Risa 0,35 | Risa 0,35 |
+| 2 sorprendido | O 1,0 | O 1,0 | O 1,0 |
+| 3 pensativo | Puchero 1,0 | Puchero 1,0 | Puchero 1,0 |
+| 4 guiñando | ninguna | ninguna | ninguna |
+| 5 serio | Plano 1,0 | Plano 1,0 | Plano 1,0 |
+| 6 risa | Risa 1,0 | Risa 1,0 | Risa 1,0 |
 
-Se dejaron los hex propuestos sin retocar: con la iluminación de los renders las manchas siguen distinguiéndose
-(más suaves que antes, porque el violeta nuevo es más claro y el contraste relativo es el mismo) y el iris se lee
-bien dentro del blanco del ojo. Las texturas de **cabeza y cuerpo se hornearon de nuevo** (color y normales
-2048²); las normales de la sudadera se reutilizan (`reuse_hoodie`). Ventosas, boca, bombilla, pantallas: sin cambio.
+Como en v013, en las filas del `.glb` y del `.fbx` los accesorios se ven, porque `Expresiones` no fija la visibilidad.
 
-### 2. Logo oficial en la sudadera, el portátil y la taza
-Los archivos de `personaje/marca/` se usan tal cual, como texturas con transparencia (aro y letras blancos
-`#FFFFFF`, barra diagonal `#8070E7`):
-
-| Dónde | Archivo | Cómo | Tamaño y sitio |
-|---|---|---|---|
-| Pecho de la sudadera | `quantic-logo-blanco.png` | objeto `Logo_Sudadera`: rejilla con la textura, envuelta a la sudadera con Shrinkwrap (5 mm por delante de la tela), material mate | mismo ancho que el logo anterior (16 cm); **1 cm más alto** (centro a 0,395 m en vez de 0,385), porque el logo anterior era geometría que flotaba delante del bolsillo y una textura pegada a la tela quedaba tapada por el bolsillo y su costura |
-| Tapa del portátil | `quantic-isotipo-blanco.png` | objeto `Laptop_LogoQ`: plano con la textura en la cara trasera de la tapa | mismo sitio y diámetro (5 cm) que el aro anterior |
-| Taza | `quantic-logo-blanco.png` | textura `taza.png` regenerada (1024 × 512, fondo `#15151C`): el logo ocupa la misma franja que el «Q Quantic» anterior (425 px de ancho, centrado al frente) | igual que antes |
-
-El logo anterior (aro cian con «Quantic», objetos `Logo_Anillo`, `Logo_Q_Cola` y `Logo_Texto`, y el aro
-`Laptop_LogoQ` cian) desaparece. El cian `#22D3EE` queda solo en las pantallas, por decisión de Quantic.
-En los renders de frente y de busto el logo del pecho se lee entero («Quantic» con la Q de barra violeta).
-
-### 3. Lo que no cambia
-Pantallas del portátil, del móvil y del panel (azul `#1A6FFF` y cian `#22D3EE`), ventosas, ojos, gafas, sudadera,
-bombilla, boca, geometría, brazos, animaciones, nombres `Acc_*` y visibilidad por modo.
-
-### 4. Entrega
-Todos los renders regenerados (modos, expresiones y comparaciones) y las tres exportaciones. `personaje/FICHA.md`
-con la tabla de colores nueva y sin el pendiente de confirmar los hex. Archivos binarios por Git LFS.
+### 6. Entrega
+Todos los renders regenerados (modos, expresiones y comparaciones) con la misma receta que v014 (Eevee, 32 muestras,
+vista Standard, 1600 × 2000, mismas cámaras, luces y fotogramas): comparados píxel a píxel con los de v014, solo cambia
+la zona del pecho. Las tres exportaciones, con los mismos ajustes que v014 (el `.glb` conserva la interpolación STEP
+de la boca en `Expresiones`, de 0 a 0,25 s). Archivos binarios por Git LFS.
 
 ## Reparto de accesorios y brazos (sin cambios desde v011)
 
@@ -86,23 +125,19 @@ Saludo 200, Idea 300, Tecleo 400, Relax 500, Organizar 600). Para posar o render
 `sc.frame_set(clip_frame(nombre, f))`, o `goto(nombre, f)` con todas las pistas activas.
 
 ## Pendiente
-- Revisión de Quantic: el borde del bolsillo canguro (el aro de la sudadera) pasa por encima de la parte
-  baja del logo del pecho y tapa la barra violeta de la Q y el pie de las letras, en los renders y en el
-  `.glb`. Los extremos de los cordones también pisan la parte alta del logo.
-- Revisión de Quantic: `modelo/renders/comparacion/bocas_glb_fbx_vs_renders.png` es de v013 y muestra los
-  colores y el logo antiguos.
 - El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia `Idea`; en reposo está encendida.
 - Las mangas nacen dentro del cuerpo de la sudadera; si un brazo se lleva muy atrás por código, la manga
   puede asomar por la espalda. Los clips entregados no lo hacen.
+- Los cordones quedan más cortos (3,2 cm de cuerda más la punta). Si se prefieren más largos, habría que separarlos
+  hacia los lados del logo o bajar el bolsillo; no se ha hecho para no cambiar nada más.
 
 ## Qué se infirió
 - Igual que en versiones anteriores: toda la geometría sale de una hoja de personaje raster sin escala
   real; la altura de 1,000 m es decisión nuestra y el grosor de cada pieza se dedujo de las vistas.
-- Los hex de manchas e iris son los que propuso Quantic (mismo salto de tono); el Modelador 3D comprobó en
-  los renders que se distinguen y no los retocó.
-- Que el logo del pecho suba 1 cm es decisión del Modelador 3D para que la textura no quede tapada por el
-  bolsillo; el ancho se mantiene.
+- Cómo liberar el logo (corregir la costura del bolsillo, subir el logo 1,5 cm y acortar los cordones 3,5 cm) y los
+  márgenes (0,9 cm sobre el bolsillo y 1,2 cm bajo los cordones) son decisión del Modelador 3D, entre las opciones
+  que dio Quantic. En la hoja de personaje los cordones también acaban por encima del logo.
 
 ## Medidas (sin cambios)
 Alto 1,000 m, ancho 0,80 m, fondo 0,65 m en reposo con todos los accesorios en alto; topología 27 198 quads,
-388 triángulos y 63 n-gonos (menos que en v013 porque el logo del pecho ya no es geometría); 55 huesos.
+388 triángulos y 63 n-gonos; 55 huesos.

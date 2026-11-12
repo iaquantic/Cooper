@@ -1,9 +1,8 @@
-# Pedido al Modelador 3D: Cooper v015 (pendiente de enviar)
+# Pedido al Modelador 3D: Cooper v015 (entregado)
 
-**Estado:** preparado el 2026-11-10 y todavía sin enviar. Quantic lo enviará al Modelador al día siguiente.
-
-Copia el mensaje en la sesión del Modelador 3D (C:\Trabajo\Modelador 3D). Los pedidos anteriores se
-entregaron como v009 a v014.
+**Estado:** preparado el 2026-11-10 y entregado el 2026-11-12 como v015. Por primera vez el Modelador lo
+hizo en una sesión en la nube, con Blender sin interfaz, en lugar del PC de C:\Trabajo\Modelador 3D.
+Las notas de la entrega están en `modelo/NOTAS.md`.
 
 ---
 

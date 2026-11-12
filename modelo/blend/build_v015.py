@@ -1,4 +1,11 @@
-# Cooper (mascota Quantic) — construcción v014 (Blender 5.2, ejecutar dentro de Blender)
+# Cooper (mascota Quantic) — construcción v015 (Blender 5.2, ejecutar dentro de Blender)
+# v015 (revisión de Quantic de la v014): el logo del pecho se ve entero y limpio. (1) La costura del bolsillo canguro
+# (Costura_Bolsillo) se escalaba en el eje equivocado (0,6 en la profundidad en vez de en la altura) y era un aro 2 cm más
+# alto que el bolsillo que cruzaba el pie del logo: ahora sigue el borde del bolsillo al 82 % en ancho y en alto
+# (scale (1.4, 0.6, 0.6)). (2) El logo sube 1,5 cm (LOGO_Z). (3) Los cordones se acortan 3,9 cm del script (3,5 cm en el
+# mundo) desde abajo, con el arranque en el cuello fijo, y la punta sube con ellos (CORD_SHORTEN). (4) La textura del logo
+# del pecho se muestrea con extensión EXTEND (CLAMP_TO_EDGE en glTF): el logo toca los cuatro bordes de la imagen y con
+# REPEAT el filtrado traía el pie de las letras al borde superior. Nada más cambia respecto a v014.
 # v014 (colores oficiales de Quantic, personaje/marca/README.md del repo): cuerpo, cabeza y tentáculos en el violeta de marca
 # #8070E7 (antes #5B2BE0); manchas #564CA3 e iris #564EA1 (mismo salto de tono). Logo oficial (Q con barra violeta, versión
 # blanca) como textura con alfa: en el pecho (quantic-logo-blanco.png envuelto a la sudadera), en la tapa del portátil
@@ -32,7 +39,7 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v014"
+BASE = os.environ.get("COOPER_BASE", r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v015")   # v015: COOPER_BASE permite ejecutarlo fuera del PC de trabajo
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -296,14 +303,16 @@ so = hoodback.modifiers.new("grosor", 'SOLIDIFY'); so.thickness = 0.022; so.offs
 bpy.ops.object.select_all(action='DESELECT'); hoodback.select_set(True); vl.objects.active = hoodback
 bpy.ops.object.modifier_apply(modifier="grosor")
 hem = torus("Sudadera_Bajo", (0, 0, 0.285), 0.155, 0.024, m=M['sudadera'])
+CORD_SHORTEN = 0.0394   # v015: los cordones pierden 3,9 cm (3,5 cm en el mundo tras escalar a 1 m) por abajo; el arranque en el cuello no se mueve
+CORD_AX = Vector((0, -math.sin(0.15), math.cos(0.15)))   # eje del cordón (girado 0,15 rad en X), hacia arriba
 for side, sx in (("I", -1), ("D", 1)):
-    cyl(f"Cordon_{side}", (sx * 0.045, -0.160, 0.455), 0.006, 0.075, m=M['cuerda'], rot=(0.15, 0, 0))
-    cyl(f"Cordon_Punta_{side}", (sx * 0.045, -0.155, 0.412), 0.0075, 0.018, m=M['cuerda'], rot=(0.15, 0, 0))
+    cyl(f"Cordon_{side}", Vector((sx * 0.045, -0.160, 0.455)) + CORD_AX * (CORD_SHORTEN / 2), 0.006, 0.075 - CORD_SHORTEN, m=M['cuerda'], rot=(0.15, 0, 0))
+    cyl(f"Cordon_Punta_{side}", Vector((sx * 0.045, -0.155, 0.412)) + CORD_AX * CORD_SHORTEN, 0.0075, 0.018, m=M['cuerda'], rot=(0.15, 0, 0))
 pocket = qsphere("Sudadera_Bolsillo", (0, -0.155, 0.335), 0.085, scale=(1.4, 0.35, 0.6), m=M['sudadera'], levels=2)
 # costuras: hilo visible en el borde del bolsillo, el bajo, el cuello y los hombros
 # (toros finos medio hundidos en la tela: solo asoma la mitad exterior del hilo)
 seams = [torus("Costura_Bolsillo", (0, -0.172, 0.335), 0.070, 0.003, m=M['costura'], rot=(math.pi / 2, 0, 0), maj=48, mino=6)]
-seams[-1].scale = (1.4, 1.0, 0.6)                                                    # sigue el elipsoide del bolsillo al 82 % del radio
+seams[-1].scale = (1.4, 0.6, 0.6)   # v015: sigue el elipsoide del bolsillo al 82 % del radio (local Y = altura tras el giro en X; en v014 era 1.0 y el aro asomaba 2 cm sobre el bolsillo)
 seams.append(torus("Costura_Bajo", (0, 0, 0.300), 0.173, 0.003, m=M['costura'], maj=64, mino=6)); seams[-1].scale = (1.0, 0.86, 1.0)
 seams.append(torus("Costura_Cuello", (0, 0.02, 0.527), 0.138, 0.003, m=M['costura'], rot=(0.25, 0, 0), maj=64, mino=6))
 seams.append(torus("Costura_Capucha", (0, 0.145, 0.60), 0.085, 0.003, m=M['costura'], rot=(0, math.pi / 2, 0), maj=48, mino=6))   # costura central de la capucha
@@ -432,11 +441,11 @@ luzoff_e = vis_group("LuzOff", [b_glass_off, b_fil_off], (bx, by, bz + 0.12))   
 lx, ly, lz = -0.16, -0.23, 0.41   # v011: delante del pecho, a la izquierda; lo sostiene la mano izquierda (T2)
 l_base = cube("Laptop_Base", (lx, ly, lz), (0.18, 0.13, 0.008), M['gris'], rot=(0, 0, 0.15), c=A)
 l_lid = cube("Laptop_Tapa", (lx - 0.01, ly - 0.062, lz + 0.06), (0.18, 0.008, 0.125), M['gris'], rot=(-0.25, 0, 0.15), c=A)
-def screen_mat(name, png, emit=1.6, rough=0.25, alpha=False):
+def screen_mat(name, png, emit=1.6, rough=0.25, alpha=False, extension='REPEAT'):
     """material con imagen: emisivo para pantallas (emit>0), mate para objetos, con transparencia si alpha"""
     m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree
     bsdf = next(n for n in nt.nodes if n.type == 'BSDF_PRINCIPLED'); bsdf.inputs['Roughness'].default_value = rough
-    img = bpy.data.images.load(os.path.join(TEX, png)); tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = img
+    img = bpy.data.images.load(os.path.join(TEX, png)); tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = img; tex.extension = extension
     nt.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
     if emit:
         nt.links.new(tex.outputs['Color'], bsdf.inputs['Emission Color']); bsdf.inputs['Emission Strength'].default_value = emit
@@ -450,11 +459,12 @@ def screen_plane(name, center, size, rot_matrix, m, c=C_ACC):
     o.scale = (size[0], size[1], 1); o.rotation_euler = (rot_matrix @ Matrix.Rotation(math.pi / 2, 4, 'X')).to_euler()
     o.data.materials.append(m); link(o, c); return o
 # v014: logo oficial de Quantic en el pecho (personaje/marca/quantic-logo-blanco.png): rejilla con la textura con alfa, envuelta
-# a la sudadera con Shrinkwrap; mismo ancho que el logo anterior (aro + «Quantic», de x=-0,085 a +0,075) y 1 cm más alto
-LOGO_W = 0.160; LOGO_H = LOGO_W * 758 / 3546
-bpy.ops.mesh.primitive_grid_add(x_subdivisions=24, y_subdivisions=6, size=1, location=(-0.005, -0.181, 0.395))   # 1 cm más alto que el logo anterior: así queda entero por encima del bolsillo y su costura
+# a la sudadera con Shrinkwrap; mismo ancho que el logo anterior (aro + «Quantic», de x=-0,085 a +0,075)
+# v015: 1,5 cm más alto que en v014 (en el mundo; 1,67 cm del script): 0,9 cm libres sobre el bolsillo y 1,2 cm bajo las puntas de los cordones
+LOGO_W = 0.160; LOGO_H = LOGO_W * 758 / 3546; LOGO_Z = 0.395 + 0.0167
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=24, y_subdivisions=6, size=1, location=(-0.005, -0.181, LOGO_Z))
 logo = bpy.context.active_object; logo.name = "Logo_Sudadera"; logo.scale = (LOGO_W, LOGO_H, 1); logo.rotation_euler = (math.pi / 2, 0, 0)
-logo.data.materials.append(screen_mat('Q_LogoSudadera', 'quantic-logo-blanco.png', emit=0.0, rough=0.55, alpha=True)); link(logo, C_CHAR)
+logo.data.materials.append(screen_mat('Q_LogoSudadera', 'quantic-logo-blanco.png', emit=0.0, rough=0.55, alpha=True, extension='EXTEND')); link(logo, C_CHAR)   # v015: EXTEND, sin rayitas en el borde
 sw = logo.modifiers.new("Envolver", 'SHRINKWRAP'); sw.target = hood; sw.wrap_method = 'NEAREST_SURFACEPOINT'; sw.offset = 0.005
 parent_keep(logo, body)
 R_lid = Matrix.Rotation(0.15, 4, 'Z') @ Matrix.Rotation(-0.25, 4, 'X')
@@ -1105,4 +1115,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v014 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v015 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
