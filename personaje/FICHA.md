@@ -1,7 +1,7 @@
 # Ficha de Cooper
 
 Cooper es el pulpo, la mascota de Quantic. Esta ficha reúne lo que el Modelador 3D tiene de él a
-2026-11-06, tras dieciséis versiones del modelo (`modelo/NOTAS.md` es la nota de la versión entregada, v016).
+2026-11-06, tras diecisiete versiones del modelo (`modelo/NOTAS.md` es la nota de la versión entregada, v017).
 
 **Qué es dato y qué decidió Quantic.** El aspecto, los colores y las expresiones salen de la hoja de
 personaje raster (cuatro vistas de cuerpo entero y seis expresiones) y de la tabla de identidad. La
@@ -69,7 +69,7 @@ Desde la v014 el cuerpo lleva el violeta oficial de Quantic y los logos son los 
 | Pupila | Negro | `#0A0A14` |
 | Gafas y cejas | Negro | `#101014` |
 | Sudadera | Azul marino casi negro | `#0E1424` (interior capucha `#070A14`, costuras `#2A3450`) |
-| Logo Quantic (sudadera, portátil y taza) | Oficial, versión blanca: aro y letras blancos, barra diagonal violeta | `#FFFFFF` y `#8070E7` (`personaje/marca/`) |
+| Logo Quantic (sudadera, portátil y taza) | Oficial, el de la web publicada (quantic.bequantic.org), versión blanca: aro y letras blancos, barra diagonal violeta; en el portátil, el isotipo | `#FFFFFF` y `#8070E7` (`personaje/marca/`) |
 | Interior de la boca / lengua | Negro / rosa | `#0A0A14` / `#E8486C` |
 | Bombilla encendida | Amarillo cálido | vidrio `#FFD060`, filamento `#FFC43A`, emisión `#FFB020` |
 | Pantallas (laptop, móvil, panel) | Azul y cian emisivos (sin cambio, decisión de Quantic) | `#1A6FFF`, `#22D3EE` |
@@ -102,7 +102,7 @@ ocupan un 40 % del diámetro de la cabeza y quedan casi pegados bajo el puente d
 - **Ojos grandes y juntos**, blancos con iris violeta y pupila negra, tras unas **gafas de montura gruesa
   tipo wayfarer** con puente corto.
 - **Sudadera** azul marino con capucha, cordones, bolsillo canguro, **mangas con puño**, costuras y el
-  **logo oficial de Quantic** (Q con barra violeta, versión blanca) en el pecho.
+  **logo oficial de Quantic**, el de la web publicada (Q con barra violeta, versión blanca), en el pecho.
 - **Ocho tentáculos** con ventosas rosas en anillo: **dos son brazos** que salen por las mangas (el
   izquierdo sostiene el portátil, el derecho la taza; decisión de Quantic, a partir de v011) y **seis
   quedan abajo**; uno de los de abajo sube la **bombilla** en el modo Idea.
@@ -115,7 +115,7 @@ brazo derecho; bombilla, móvil y checklist: tentáculos de abajo; el panel flot
 pueden ocultar por objeto. El reparto completo está en `modelo/NOTAS.md`.
 
 ## Expresiones y poses disponibles
-En el `.glb` y el `.fbx` van como animaciones (con las bocas); en el `.blend` como pistas NLA, cada clip en su rango de fotogramas. Versión v016.
+En el `.glb` y el `.fbx` van como animaciones (con las bocas); en el `.blend` como pistas NLA, cada clip en su rango de fotogramas. Versión v017.
 
 | Animación | Contenido | Accesorio visible |
 |---|---|---|
@@ -141,17 +141,18 @@ accesorios y con el mismo encuadre).
   `modelo/renders/modos/`: `cooper_idea_*`, `cooper_trabajo_*`, `cooper_relax_*`, `cooper_organizar_*`
   (de frente y de tres cuartos), `cooper_sin_accesorios_frente.png` y `cooper_saludo_*`. Las expresiones
   están en `modelo/renders/expresiones/`. Para una pose o expresión nueva se renderiza desde el `.blend`.
-- **Animaciones:** `modelo/animacion/cooper_v016_rig.fbx` (FBX) o el mismo `modelo/web/cooper_v016.glb`,
+- **Animaciones:** `modelo/animacion/cooper_v017_rig.fbx` (FBX) o el mismo `modelo/web/cooper_v017.glb`,
   que ya lleva el esqueleto. Esqueleto de 55 huesos: raíz, cuerpo, cabeza, mirada (los ojos la siguen), párpados, cejas, ojos felices, dientes,
   marcas, bombilla encendida/apagada, seis huesos de accesorio `Acc_*` y ocho cadenas de tres huesos con
   control IK en la punta: dos brazos (`T2_BrazoIzq`, `T7_BrazoDer`, con raíz en los hombros; las mangas van
   pesadas a la misma cadena) y seis tentáculos de abajo (`T1_Bombilla`, `T3_Movil`, `T4_PieIzq`,
   `T5_PieDer`, `T6_Checklist`, `T8_Trasero`); boca con shape keys (O, plano, risa, puchero). Los siete clips vienen incluidos;
   los de modo fijan solos qué accesorio se ve.
-- **Dentro de proyectos:** `modelo/web/cooper_v016.glb` (escala 1, Y arriba, 15 MB con texturas, esqueleto
+- **Dentro de proyectos:** `modelo/web/cooper_v017.glb` (escala 1, Y arriba, 15 MB con texturas, esqueleto
   y las siete animaciones; es el único `.glb`). Al cargarlo los seis accesorios están visibles: ocultar por nombre los que no
   toquen (`Acc_*`) o reproducir el clip del modo, que ya lo hace. Para pantallas con otro contenido,
   sustituir los PNG de pantalla y reexportar.
 
 ## Pendiente
-- Nada pendiente de Quantic: los colores y logos oficiales están aplicados desde la v014.
+- Nada pendiente de Quantic: los colores y logos oficiales están aplicados desde la v014, y desde la v017 el logo
+  completo es el de la web publicada.

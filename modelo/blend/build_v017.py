@@ -1,4 +1,8 @@
-# Cooper (mascota Quantic) — construcción v016 (Blender 5.2, ejecutar dentro de Blender)
+# Cooper (mascota Quantic) — construcción v017 (Blender 5.2, ejecutar dentro de Blender)
+# v017: logo oficial de la web publicada (https://quantic.bequantic.org/), personaje/marca/quantic-logo-blanco.png del
+# repositorio de Cooper desde el 2026-11-12: igual que el anterior salvo la última «c», que ahora abre a la derecha. Va en
+# TEX/quantic-logo-blanco.png (pecho) y en TEX/taza.png, que se genera a partir de él con taza_png() (abajo; la misma receta
+# con la que se hizo la taza de v014–v016). El isotipo del portátil no cambia. Nada más cambia respecto a v016.
 # v016 (pedido de Quantic: «alarga los cordones separándolos hacia los lados del logo»): cada cordón es un tubo que sale de
 # debajo del ribete del cuello (en el mundo, x ±0,05 m; en v015 era un cilindro recto en x ±0,04 que flotaba 2,5 cm delante
 # del cuello), apoya en la tela con 1,2 mm de holgura y baja abriéndose hasta caer por los lados del logo. CORD_PATH es su
@@ -45,7 +49,7 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = os.environ.get("COOPER_BASE", r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v016")   # v015: COOPER_BASE permite ejecutarlo fuera del PC de trabajo
+BASE = os.environ.get("COOPER_BASE", r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v017")   # v015: COOPER_BASE permite ejecutarlo fuera del PC de trabajo
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -526,6 +530,14 @@ p_cam = cyl("Movil_Camara", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, 0.04
 p_bar = cube("Movil_Barra", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, -0.047))), (0.022, 0.001, 0.003), M['blanco'], rot=(0.1, -0.15, 0.25), c=A)
 group("Grp_Movil", [p_body, p_scr, p_cam, p_bar], "Acc_Movil")
 tx, ty, tz = 0.28, -0.20, 0.58   # v011: la taza la lleva la mano derecha (brazo T7)
+def taza_png(logo_png, out_png):
+    """v017: genera TEX/taza.png (1024 × 512, fondo #15151C) con el logo completo reescalado a 425 × 91 px (Lanczos) en
+    (365, 210). Necesita Pillow, que Blender no trae: se ejecuta copiando esta función a un Python con Pillow, antes del
+    build. Con el logo anterior reproduce exactamente la taza de v014–v016."""
+    from PIL import Image
+    c = Image.new('RGBA', (1024, 512), (0x15, 0x15, 0x1C, 255))
+    c.alpha_composite(Image.open(logo_png).convert('RGBA').resize((425, 91), Image.LANCZOS), (365, 210))
+    c.convert('RGB').save(out_png)
 TAZA_GIRO = math.radians(-90)   # gira el cilindro para que el centro de la tira UV (logo) mire al frente (-Y)
 def uv_cylinder(name, loc, r, h, m, N=48, front=-math.pi / 2, c=C_ACC):
     """cilindro con UV explícito: u da la vuelta (u=0,5 en el ángulo 'front', hacia -Y), v = altura; tapas en una esquina del mapa"""
@@ -1143,4 +1155,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v016 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v017 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
