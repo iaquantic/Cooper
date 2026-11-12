@@ -9,19 +9,16 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 | Parte | Estado | Origen |
 |---|---|---|
 | Personalidad y características | Definidas el 2026-11-06 (`personaje/FICHA.md`) | Aspecto: Modelador 3D · Personalidad: Quantic |
-| Modelo 3D | Entregado el 2026-11-12, versión v017 (v016 + logo oficial de la web en el pecho y la taza); notas en `modelo/NOTAS.md` | Modelador 3D |
+| Modelo 3D | Entregado el 2026-11-12, versión v018 (v017 + logo oficial en las pantallas del portátil y del móvil, sin rayitas en el isotipo de la tapa); notas en `modelo/NOTAS.md` | Modelador 3D |
 
 ## Pendientes
 
 - **Brazos sobre los cordones:** en la expresión «5 serio» y en el modo Trabajo (`Tecleo`) los brazos pasan por
   encima de los cordones, como ya pasaba con la tela de la sudadera. En los renders no se nota; arreglarlo del
   todo exige tocar las animaciones.
-- **Pantallas del portátil y del móvil:** su cabecera es un aro cian con «Quantic» en letra normal, un diseño
-  anterior que no usa el logo oficial. Falta decidir si se cambia por el logo de la web.
-- **Rayitas junto a la Q del portátil:** de cerca se ven unas líneas finas junto al isotipo porque la textura se
-  repite en los bordes. Se arregla igual que en el pecho, poniendo la extensión EXTEND en `Q_LogoLaptop`.
-- **Texturas de `build_v017.py`:** el script espera el logo y la taza nuevos en la carpeta `texturas/` de la v017
-  del Modelador, en su PC. Hay que copiarlos allí antes de ejecutarlo de nuevo.
+- **Texturas de `build_v018.py`:** el script lee las texturas de la carpeta `texturas/` de la versión, en el PC del
+  Modelador, y allí no existen las de la v017 ni las de la v018. Antes de volver a ejecutarlo hay que crearla
+  (detalle en `modelo/NOTAS.md`, punto 5).
 
 ## Estructura
 
@@ -33,7 +30,7 @@ modelo/
   web/              Único .glb: web, tiempo real y animación (con esqueleto)
   animacion/        Versión FBX con esqueleto para animar
   renders/          Imágenes con fondo transparente: modos/, expresiones/ y comparacion/ (.png)
-  NOTAS.md          Notas de la versión entregada (v017): nombres de accesorios y visibilidad por modo
+  NOTAS.md          Notas de la versión entregada (v018): nombres de accesorios y visibilidad por modo
 SOLICITUD-MODELADOR-3D.md   Pedido al Modelador 3D
 ```
 

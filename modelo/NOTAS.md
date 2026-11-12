@@ -1,66 +1,75 @@
-# Cooper v017 — notas de la versión
+# Cooper v018 — notas de la versión
 
-**Fecha:** 2026-11-12 · **Parte de:** v016 · **Pedido:** Quantic confirma que el logo oficial es el de la web publicada
-(https://quantic.bequantic.org/); `personaje/marca/quantic-logo-blanco.png` pasa a ser ese archivo (ver `personaje/marca/README.md`).
+**Fecha:** 2026-11-12 · **Parte de:** v017 · **Pedido:** Quantic aprueba los dos pendientes de la v017: el logo oficial en
+las pantallas del portátil y del móvil, y quitar las rayitas junto a la Q de la tapa del portátil.
 
 Archivos de esta versión en el repositorio `iaquantic/Cooper`:
 
 | Archivo | Qué es |
 |---|---|
-| `modelo/blend/cooper_v017.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
-| `modelo/blend/build_v017.py` | Script que reconstruye Cooper desde cero; `bake_reuse(dir)` con las texturas de v014 (ni la piel ni la sudadera cambian). Toma el logo y la taza de `TEX` (`quantic-logo-blanco.png` y `taza.png`); `taza_png()` genera la taza a partir del logo. La variable de entorno `COOPER_BASE` permite indicar la carpeta de la versión fuera del PC de trabajo. |
-| `modelo/web/cooper_v017.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas (logos de marca incluidos), esqueleto de 55 huesos, shape keys y las 7 animaciones con las bocas. |
-| `modelo/animacion/cooper_v017_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
-| `modelo/renders/modos/` | PNG 1600 × 2000 con fondo transparente, un accesorio por modo (de frente y de tres cuartos), sin accesorios y saludando. |
-| `modelo/renders/expresiones/` | Las siete expresiones, sin accesorios, con el mismo encuadre. |
-| `modelo/renders/comparacion/` | Comparaciones con la hoja de personaje y `bocas_glb_fbx_vs_renders.png` (renders frente a `.glb` y `.fbx` importados), las cuatro de v017. |
+| `modelo/blend/cooper_v018.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
+| `modelo/blend/build_v018.py` | Script que reconstruye Cooper desde cero; `bake_reuse(dir)` con las texturas de v014 (ni la piel ni la sudadera cambian). Toma de `TEX` el logo, el isotipo, la taza y las dos pantallas; `taza_png()`, `pantalla_laptop_png()` y `pantalla_movil_png()` generan las texturas derivadas del logo. La variable de entorno `COOPER_BASE` permite indicar la carpeta de la versión fuera del PC de trabajo. |
+| `modelo/web/cooper_v018.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas (logos de marca incluidos), esqueleto de 55 huesos, shape keys y las 7 animaciones con las bocas. |
+| `modelo/animacion/cooper_v018_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
+| `modelo/renders/modos/` | PNG 1600 × 2000 con fondo transparente. De v018: `cooper_trabajo_frente.png` y `cooper_trabajo_tres_cuartos.png` (los únicos donde se ve el portátil); el resto, de v017 (ver punto 4). |
+| `modelo/renders/expresiones/` | Las siete expresiones, de v017 (sin accesorios: no cambian). |
+| `modelo/renders/comparacion/` | Las cuatro comparaciones y `bocas_glb_fbx_vs_renders.png`, de v018. |
 
-Geometría (cordones de v016 incluidos), colores, isotipo del portátil, pantallas, brazos, animaciones, reparto de
-accesorios, nombres `Acc_*` y visibilidad por modo: **iguales que en v016**. Cambian solo las dos texturas que llevan el
-logo completo.
+Geometría, colores, logo del pecho, taza, cordones, brazos, animaciones, reparto de accesorios, nombres `Acc_*` y
+visibilidad por modo: **iguales que en v017**. Cambian la cabecera de las dos pantallas y la extensión de tres texturas.
 
-## Qué cambió respecto a v016
+## Qué cambió respecto a v017
 
-### 1. Logo oficial de la web en el pecho
-El archivo anterior (`assets/quantic-blanco.png` de la web) tenía la última «c» invertida y el modelo leía «Qucntiɔ».
-El nuevo (`quantic_blanco_1`, el que usa la web publicada) es igual en tamaño (3546 × 758) y diseño salvo esa «c»,
-que abre a la derecha: ahora se lee «Qucntic», como en la web.
+### 1. Logo oficial en las pantallas del portátil y del móvil
+La cabecera de las dos pantallas era un aro cian con «Quantic» en tipografía normal (de cuando se hicieron las
+pantallas, antes de tener el logo oficial). Ahora lleva el **logo oficial de la web**, `personaje/marca/quantic-logo-blanco.png`
+tal cual (aro y letras blancos, barra `#8070E7`; solo se reescala, con Lanczos y alfa premultiplicado para que no salgan
+halos), sobre el mismo fondo azul marino `#182036` de la cabecera: blanco sobre azul oscuro, buen contraste. El logo
+completo se lee bien en los dos sitios, así que no hizo falta el isotipo. El resto de cada pantalla (gráfico, cifras,
+tarjetas, puntos cian, «Panel de control») no cambia.
 
-| `Logo_Sudadera` | v016 | v017 |
+| Pantalla | v017 | v018 |
 |---|---|---|
-| Imagen (material `Q_LogoSudadera`) | logo antiguo, «c» invertida | **logo de la web** (`personaje/marca/quantic-logo-blanco.png`, byte a byte) |
-| Tamaño, sitio y extensión de la textura | 13,2 × 2,9 cm, z 0,3594–0,3879, EXTEND | igual |
+| Portátil (`pantalla_laptop.png`, 768 × 480) | aro cian + «Quantic» en x 22–170, y 14–42 de la barra superior | **logo oficial 131 × 28 px en (22, 14)** |
+| Móvil (`pantalla_movil.png`, 384 × 768) | aro cian (x 44–104) + «Quantic» (x 122–247) en la tarjeta de cabecera, «Asistente» debajo del texto en (122, 144) | **logo oficial 200 × 43 px en (44, 90)**; «Asistente» se mueve debajo del logo, alineado con él, a (44, 142) |
 
-### 2. Taza regenerada desde el logo nuevo
-`taza.png` (1024 × 512, fondo `#15151C`) era una textura **derivada** del logo antiguo: el logo reescalado a 425 × 91 px
-(Lanczos) en (365, 210). Esa receta reproduce exactamente la taza de v014–v016 a partir del logo antiguo; con el logo
-nuevo da la taza de v017, que solo cambia en la última «c» (x 730–789, y 239–300 de la imagen). Queda en el script como
-`taza_png()`. Mismo tamaño, sitio y colores en la taza.
+Las recetas quedan en `build_v018.py` (`pantalla_laptop_png()` y `pantalla_movil_png()`, como `taza_png()`): parten de las
+pantallas de v014–v017 y del logo oficial, y dan exactamente las texturas empaquetadas.
 
-### 3. Lo que se revisó y no cambia
-- **Portátil:** lleva el **isotipo** (`quantic-isotipo-blanco.png`), idéntico byte a byte al de `personaje/marca/` y al
-  de la web. Sin cambios.
-- **Pantallas del portátil y del móvil, checklist, teclas y panel:** ninguna usa el archivo del logo ni deriva de él.
-  Las pantallas del portátil y del móvil tienen una cabecera propia (aro cian y «Quantic» escrito en tipografía normal,
-  que se lee bien) de cuando se hicieron las pantallas; el panel solo tiene marcos y barras. No se tocan: el pedido es
-  sustituir el archivo del logo y el resto sigue como en v016. Ver Pendiente.
-- Ninguna referencia al archivo antiguo: en el `.blend`, las dos imágenes empaquetadas son los archivos nuevos (y su
-  ruta apunta a la carpeta `texturas` de v017); en el `.glb` y el `.fbx`, las imágenes embebidas del logo y la taza son
-  idénticas píxel a píxel a las nuevas y no queda ninguna copia de las antiguas.
+Se revisaron las demás piezas: ninguna otra lleva el «Quantic» antiguo ni el aro cian como marca. Los puntos cian de
+las tarjetas del móvil y los marcos y barras cian del panel de datos son elementos de interfaz, no la marca, y se quedan.
+La checklist y las teclas no llevan logo.
 
-### 4. Comprobación
-Renders comparados píxel a píxel con los de v016: solo cambia la última «c» del logo del pecho (y la de la taza en
-`cooper_relax_frente.png`); en `cooper_expresion_5_serio.png` y en los dos de `cooper_trabajo_*` el logo queda detrás de
-los brazos o del portátil y la imagen es la misma. Comprobado de frente, de tres cuartos, en los bustos, en el `.glb`
-importado en un Blender limpio y cargado en three.js (pecho «Qucntic», taza y portátil) y en el `.fbx` importado.
-Las bocas siguen coincidiendo en las tres filas de `bocas_glb_fbx_vs_renders.png` (feliz Risa 0,35 · sorprendido O 1,0 ·
-pensativo Puchero 1,0 · guiñando ninguna · serio Plano 1,0 · risa Risa 1,0).
+### 2. Sin rayitas junto a la Q de la tapa (y en las pantallas)
+El isotipo de la tapa toca los bordes de su imagen y la textura se repetía (REPEAT): de cerca se veían una raya sobre la
+Q y una línea a su derecha. Ahora `Q_LogoLaptop` se muestrea con extensión **EXTEND** (en el `.glb`, `CLAMP_TO_EDGE`),
+como el logo del pecho desde v015. Por el mismo motivo pasan a EXTEND las dos pantallas (`Q_PantallaLaptop` y
+`Q_PantallaMovil`), que no se repiten: así sus bordes tampoco arrastran el lado contrario de la imagen. La taza se queda en
+REPEAT a propósito: su textura da la vuelta al cilindro y el logo queda lejos de los bordes. Estado final de las texturas
+con logo o isotipo: pecho, tapa del portátil y pantallas en EXTEND; taza en REPEAT.
 
-### 5. Entrega
-Todos los renders regenerados (modos, expresiones y comparaciones) con la misma receta que v014–v016 (Eevee, 32 muestras,
-vista Standard, 1600 × 2000, mismas cámaras, luces y fotogramas) y las tres exportaciones con los mismos ajustes (el
-`.glb` conserva la interpolación STEP de la boca en `Expresiones`). Cordones, márgenes del logo y contactos en las
-animaciones: los de v016 (ver el historial de este archivo). Archivos binarios por Git LFS.
+### 3. Comprobación
+- **De cerca** (cámaras ortográficas frente a cada pieza, mismas para v017 y v018): pantalla del portátil en reposo y en
+  `Tecleo`, pantalla del móvil e isotipo de la tapa. El logo se lee «Qucntic», y en la tapa ya no hay rayas.
+- **`.blend`, `.glb` y `.fbx`:** las dos pantallas embebidas son idénticas píxel a píxel a las nuevas, y en el `.glb` el
+  isotipo y las pantallas llevan `CLAMP_TO_EDGE`. El logo, el isotipo y la taza siguen siendo los de v017. Las rutas de
+  las dos pantallas en el `.blend` apuntan a la carpeta `texturas` de v018.
+- **three.js:** el `.glb` cargado muestra el logo oficial en las dos pantallas (reposo y `Tecleo`).
+- **Bocas:** siguen coincidiendo en las tres filas de `bocas_glb_fbx_vs_renders.png`. El `.fbx` importado tiene la misma
+  estructura que el de v017.
+
+### 4. Renders
+Se regeneraron todos con la misma receta (Eevee, 32 muestras, Standard, 1600 × 2000). Solo cambian los de `Trabajo`
+(el portátil) y el reposo con todos los accesorios de `comparacion_frente.png` (portátil y móvil). Los otros 16 de
+`modos/` y `expresiones/` salen idénticos píxel a píxel a los de v017 (diferencia máxima 0/255), así que se dejan los de
+v017. Las cuatro comparaciones se rehacen con el rótulo de v018.
+
+### 5. Texturas en la carpeta de la versión
+El `.blend` es autónomo, pero `build_v018.py` lee las texturas de `BASE/texturas`. En el PC del Modelador esa carpeta
+(`proyectos/mascota-quantic/v018/texturas`, y la de v017) no existe todavía, porque esta sesión no escribe en el repositorio del
+Modelador. Para ejecutar el build allí hay que crearla: las de v014 más `quantic-logo-blanco.png` (de `personaje/marca/`),
+`taza.png`, `pantalla_laptop.png` y `pantalla_movil.png`. Las tres últimas se generan con `taza_png()`,
+`pantalla_laptop_png()` y `pantalla_movil_png()` o se extraen del `.blend`.
 
 ## Reparto de accesorios y brazos (sin cambios desde v011)
 
@@ -95,21 +104,17 @@ Saludo 200, Idea 300, Tecleo 400, Relax 500, Organizar 600). Para posar o render
 - El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia `Idea`; en reposo está encendida.
 - Las mangas nacen dentro del cuerpo de la sudadera; si un brazo se lleva muy atrás por código, la manga
   puede asomar por la espalda. Los clips entregados no lo hacen.
-- En `5 serio` y en `Tecleo` los brazos se hunden en la sudadera (también en v015 y v016) y pasan por encima de los
+- En `5 serio` y en `Tecleo` los brazos se hunden en la sudadera (también en v015–v017) y pasan por encima de los
   cordones. Si se corrigiera la pose, habría que comprobar de nuevo los cordones.
 - Si un proyecto muestra el portátil durante `Expresiones` (ese clip no fija la visibilidad), en `3 pensativo` el
   portátil roza el cordón izquierdo.
-- Pantallas del portátil y del móvil: su cabecera es un aro cian con «Quantic» escrito, no el logo oficial. Si Quantic
-  quiere el logo de la web también ahí, se cambian esas dos texturas.
-- Isotipo de la tapa del portátil: la imagen toca sus bordes y la textura se repite (REPEAT), así que de cerca se ven
-  rayitas finas junto a la Q (igual que pasaba en el pecho hasta v015). Se arregla poniendo la extensión EXTEND en
-  `Q_LogoLaptop`, como en el pecho; no se ha hecho porque el pedido era no cambiar nada más.
+- Carpeta `texturas` de v018 en el PC del Modelador: ver el punto 5.
 
 ## Qué se infirió
 - Igual que en versiones anteriores: toda la geometría sale de una hoja de personaje raster sin escala
   real; la altura de 1,000 m es decisión nuestra y el grosor de cada pieza se dedujo de las vistas.
-- La receta de la taza (425 × 91 px en (365, 210), Lanczos) se dedujo de la taza de v016: reproducirla con el logo
-  antiguo da la misma imagen, píxel a píxel.
+- El tamaño y la posición del logo en cada pantalla, y mover «Asistente» bajo el logo en el móvil, son decisión del
+  Modelador 3D: el logo ocupa el sitio de la cabecera antigua, con la misma altura que el aro en el portátil.
 
 ## Medidas (sin cambios)
 Alto 1,000 m, ancho 0,80 m, fondo 0,65 m en reposo con todos los accesorios en alto; topología 27 870 quads,

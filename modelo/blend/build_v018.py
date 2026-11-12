@@ -1,4 +1,9 @@
-# Cooper (mascota Quantic) — construcción v017 (Blender 5.2, ejecutar dentro de Blender)
+# Cooper (mascota Quantic) — construcción v018 (Blender 5.2, ejecutar dentro de Blender)
+# v018 (pendientes de la v017 aprobados por Quantic): (1) las pantallas del portátil y del móvil llevan el logo oficial de
+# la web (quantic-logo-blanco.png, tal cual) en lugar de la cabecera antigua (aro cian + «Quantic» en tipografía normal);
+# TEX/pantalla_laptop.png y TEX/pantalla_movil.png se generan con pantalla_laptop_png() y pantalla_movil_png() (abajo) a
+# partir de las pantallas anteriores. (2) El isotipo de la tapa y las dos pantallas se muestrean con extensión EXTEND
+# (CLAMP_TO_EDGE en glTF), como el logo del pecho: sin rayitas en los bordes. Nada más cambia respecto a v017.
 # v017: logo oficial de la web publicada (https://quantic.bequantic.org/), personaje/marca/quantic-logo-blanco.png del
 # repositorio de Cooper desde el 2026-11-12: igual que el anterior salvo la última «c», que ahora abre a la derecha. Va en
 # TEX/quantic-logo-blanco.png (pecho) y en TEX/taza.png, que se genera a partir de él con taza_png() (abajo; la misma receta
@@ -49,7 +54,7 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = os.environ.get("COOPER_BASE", r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v017")   # v015: COOPER_BASE permite ejecutarlo fuera del PC de trabajo
+BASE = os.environ.get("COOPER_BASE", r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v018")   # v015: COOPER_BASE permite ejecutarlo fuera del PC de trabajo
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -486,6 +491,29 @@ def screen_mat(name, png, emit=1.6, rough=0.25, alpha=False, extension='REPEAT')
         try: m.surface_render_method = 'BLENDED'
         except Exception: m.blend_method = 'BLEND'
     return m
+# v018: recetas de las pantallas (Pillow, que Blender no trae: se ejecutan antes del build en un Python con Pillow, copiando
+# estas funciones; con las pantallas de v014–v017 y el logo oficial dan TEX/pantalla_laptop.png y TEX/pantalla_movil.png)
+def _logo(logo_png, w, h):
+    """logo oficial reescalado sin tocar sus colores (Lanczos con alfa premultiplicado: sin halos oscuros en los bordes)"""
+    from PIL import Image
+    return Image.open(logo_png).convert('RGBA').convert('RGBa').resize((w, h), Image.LANCZOS).convert('RGBA')
+def pantalla_laptop_png(src_png, logo_png, out_png):
+    """v018: en la barra superior (768 × 480, barra #182036 de y 0 a 57) el aro cian y «Quantic» en tipografía normal
+    (x 22–170, y 14–42) se sustituyen por el logo oficial a 131 × 28 px en (22, 14). El resto de la pantalla no cambia."""
+    from PIL import Image, ImageDraw
+    im = Image.open(src_png).convert('RGBA'); d = ImageDraw.Draw(im)
+    d.rectangle((14, 6, 184, 52), fill=(24, 32, 54, 255))
+    im.alpha_composite(_logo(logo_png, 131, 28), (22, 14)); im.convert('RGB').save(out_png)
+def pantalla_movil_png(src_png, logo_png, out_png):
+    """v018: en la tarjeta de cabecera (384 × 768, tarjeta #182036 de x 20 a 364 e y 60 a 180) el aro cian (x 44–104) y
+    «Quantic» (x 122–247) se sustituyen por el logo oficial a 200 × 43 px en (44, 90); el rótulo «Asistente» se mueve
+    debajo del logo, alineado con él (de (122, 144) a (44, 142)). El resto de la pantalla no cambia."""
+    from PIL import Image, ImageDraw
+    im = Image.open(src_png).convert('RGBA')
+    sub = im.crop((120, 142, 198, 158))                     # «Asistente» con 2 px de fondo alrededor
+    d = ImageDraw.Draw(im); d.rectangle((36, 84, 262, 164), fill=(24, 32, 54, 255))
+    im.alpha_composite(_logo(logo_png, 200, 43), (44, 90)); im.paste(sub, (42, 140))
+    im.convert('RGB').save(out_png)
 def screen_plane(name, center, size, rot_matrix, m, c=C_ACC):
     bpy.ops.mesh.primitive_plane_add(size=1, location=center); o = bpy.context.active_object; o.name = name
     o.scale = (size[0], size[1], 1); o.rotation_euler = (rot_matrix @ Matrix.Rotation(math.pi / 2, 4, 'X')).to_euler()
@@ -502,10 +530,10 @@ parent_keep(logo, body)
 R_lid = Matrix.Rotation(0.15, 4, 'Z') @ Matrix.Rotation(-0.25, 4, 'X')
 # la pantalla mira al teclado (+Y local de la tapa); la cara hacia el espectador es la trasera, con el logo Q
 l_scr = screen_plane("Laptop_Pantalla", Vector((lx - 0.01, ly - 0.062, lz + 0.06)) + (R_lid @ Vector((0, 0.0045, 0))), (0.165, 0.108),
-                     R_lid @ Matrix.Rotation(math.pi, 4, 'Z'), screen_mat('Q_PantallaLaptop', 'pantalla_laptop.png'))
+                     R_lid @ Matrix.Rotation(math.pi, 4, 'Z'), screen_mat('Q_PantallaLaptop', 'pantalla_laptop.png', extension='EXTEND'))   # v018: EXTEND
 ISO_W = 0.050; ISO_H = ISO_W * 1407 / 1490   # v014: isotipo oficial (personaje/marca/quantic-isotipo-blanco.png) en la cara trasera de la tapa
 l_q = screen_plane("Laptop_LogoQ", Vector((lx - 0.01, ly - 0.062, lz + 0.06)) + (R_lid @ Vector((0, -0.0048, 0))), (ISO_W, ISO_H), R_lid,
-                   screen_mat('Q_LogoLaptop', 'quantic-isotipo-blanco.png', emit=0.0, rough=0.55, alpha=True), c=A)
+                   screen_mat('Q_LogoLaptop', 'quantic-isotipo-blanco.png', emit=0.0, rough=0.55, alpha=True, extension='EXTEND'), c=A)   # v018: EXTEND, sin rayitas junto a la Q
 l_kb = cube("Laptop_Teclado", (lx, ly + 0.01, lz + 0.005), (0.15, 0.08, 0.003), M['negro'], rot=(0, 0, 0.15), c=A)
 l_hinge = cyl("Laptop_Bisagra", (lx - 0.005, ly - 0.060, lz), 0.006, 0.17, M['negro'], rot=(0, math.pi / 2, 0.15), verts=12, c=A)
 Rz = Matrix.Rotation(0.15, 4, 'Z')
@@ -524,7 +552,7 @@ px, py, pz = -0.33, -0.27, 0.32   # v011: el móvil lo lleva el tentáculo infer
 p_body = cube("Movil_Cuerpo", (px, py, pz), (0.058, 0.009, 0.115), M['negro'], rot=(0.1, -0.15, 0.25), c=A)
 R_ph = Matrix.Rotation(0.25, 4, 'Z') @ Matrix.Rotation(-0.15, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
 p_scr = screen_plane("Movil_Pantalla", Vector((px, py, pz)) + (R_ph @ Vector((0, -0.0047, 0))), (0.050, 0.100), R_ph,
-                     screen_mat('Q_PantallaMovil', 'pantalla_movil.png'))
+                     screen_mat('Q_PantallaMovil', 'pantalla_movil.png', extension='EXTEND'))   # v018: EXTEND
 Rp = Matrix.Rotation(0.25, 4, 'Z') @ Matrix.Rotation(-0.15, 4, 'Y') @ Matrix.Rotation(0.1, 4, 'X')
 p_cam = cyl("Movil_Camara", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, 0.046))), 0.004, 0.002, M['gris'], rot=(math.pi / 2 + 0.1, -0.15, 0.25), verts=12, c=A)
 p_bar = cube("Movil_Barra", Vector((px, py, pz)) + (Rp @ Vector((0, -0.006, -0.047))), (0.022, 0.001, 0.003), M['blanco'], rot=(0.1, -0.15, 0.25), c=A)
@@ -1155,4 +1183,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v017 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v018 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
