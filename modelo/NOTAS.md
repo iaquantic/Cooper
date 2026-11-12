@@ -1,99 +1,88 @@
-# Cooper v015 — notas de la versión
+# Cooper v016 — notas de la versión
 
-**Fecha:** 2026-11-12 · **Parte de:** v014 · **Pedido:** Quantic, revisión de la v014: el logo del pecho tapado por el bolsillo y
-los cordones, y la comparación de bocas antigua (`SOLICITUD-MODELADOR-3D.md`).
+**Fecha:** 2026-11-12 · **Parte de:** v015 · **Pedido:** Quantic, «alarga los cordones separándolos hacia los lados del logo».
 
 Archivos de esta versión en el repositorio `iaquantic/Cooper`:
 
 | Archivo | Qué es |
 |---|---|
-| `modelo/blend/cooper_v015.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
-| `modelo/blend/build_v015.py` | Script que reconstruye Cooper desde cero; `bake_reuse(dir)` con las texturas de v014 (ni la piel ni la sudadera cambian). La variable de entorno `COOPER_BASE` permite indicar la carpeta de la versión fuera del PC de trabajo. |
-| `modelo/web/cooper_v015.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas (logos de marca incluidos), esqueleto de 55 huesos, shape keys y las 7 animaciones con las bocas. |
-| `modelo/animacion/cooper_v015_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
+| `modelo/blend/cooper_v016.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
+| `modelo/blend/build_v016.py` | Script que reconstruye Cooper desde cero; `bake_reuse(dir)` con las texturas de v014 (ni la piel ni la sudadera cambian). La variable de entorno `COOPER_BASE` permite indicar la carpeta de la versión fuera del PC de trabajo. |
+| `modelo/web/cooper_v016.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas (logos de marca incluidos), esqueleto de 55 huesos, shape keys y las 7 animaciones con las bocas. |
+| `modelo/animacion/cooper_v016_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
 | `modelo/renders/modos/` | PNG 1600 × 2000 con fondo transparente, un accesorio por modo (de frente y de tres cuartos), sin accesorios y saludando. |
 | `modelo/renders/expresiones/` | Las siete expresiones, sin accesorios, con el mismo encuadre. |
-| `modelo/renders/comparacion/` | Comparaciones con la hoja de personaje y `bocas_glb_fbx_vs_renders.png` (renders frente a `.glb` y `.fbx` importados), las cuatro de v015. |
+| `modelo/renders/comparacion/` | Comparaciones con la hoja de personaje y `bocas_glb_fbx_vs_renders.png` (renders frente a `.glb` y `.fbx` importados), las cuatro de v016. |
 
-Colores, logos del portátil y de la taza, geometría, brazos, animaciones, reparto de accesorios, nombres `Acc_*` y
-visibilidad por modo: **iguales que en v014**. Cambian solo el sitio del logo del pecho, la costura del bolsillo y el
-largo de los cordones.
+Colores, logos, logo del pecho y bolsillo (sitio y tamaño de v015), resto de la geometría, brazos, animaciones, reparto de
+accesorios, nombres `Acc_*` y visibilidad por modo: **iguales que en v015**. Cambian solo los cordones.
 
-## Qué cambió respecto a v014
+## Qué cambió respecto a v015
 
 Medidas en metros, en coordenadas de Blender (Z arriba, suelo en 0), con Cooper en reposo. En el `.glb` la Z de
 Blender es la Y.
 
-### 1. El aro sobre el logo era la costura del bolsillo, mal escalada
-El «aro» que tapaba la barra violeta de la Q y el pie de las letras es la costura del bolsillo canguro
-(`Costura_Bolsillo`). Tenía que seguir el borde del bolsillo al 82 % de su tamaño, pero el script la escalaba en el
-eje equivocado (el 0,6 caía en la profundidad y no en la altura), así que era una elipse tan alta como ancha que
-asomaba 2 cm por encima del bolsillo, flotando delante del logo, y 2 cm por debajo. Ahora sigue el bolsillo en ancho
-y en alto (`scale (1.4, 0.6, 0.6)` en el script) y queda medio hundida en su cara delantera, como el resto de costuras.
+### 1. Cordones más largos que caen por los lados del logo
+En v015 cada cordón era un cilindro recto y corto, inclinado, que flotaba 2,5 cm por delante del cuello. Ahora es un
+tubo que **sale de debajo del ribete del cuello**, se apoya en la tela (con 1,2 mm de holgura) y baja abriéndose hacia
+fuera hasta caer por el lado del logo, casi en vertical al final; la punta sigue la dirección de la cuerda. Los dos son
+simétricos. Mismo grosor (cuerda Ø 1,1 cm, punta Ø 1,3 cm y 1,6 cm de largo) y mismo material que antes.
 
-| `Costura_Bolsillo` | v014 | v015 |
+| Cordones (`Cordon_I/D`, `Cordon_Punta_I/D`) | v015 | v016 |
 |---|---|---|
-| Ancho | 0,184 | 0,184 (igual) |
-| Alto | 0,131 (z 0,239–0,371) | **0,079** (z 0,265–0,344) |
-| Borde superior frente al del bolsillo (z 0,351) | 2,0 cm por encima | 0,7 cm por debajo |
+| Forma | cilindro recto, flotando delante del cuello | tubo que sale del ribete del cuello y sigue la tela |
+| Largo de la cuerda | 0,032 | **0,084** (0,064 a la vista bajo el ribete; v014: 0,067) |
+| Arranque en el cuello (x) | ±0,0405 | **±0,050** (bajo el ribete, z 0,449) |
+| Cuerda (x / z) | ±0,035…±0,046 / 0,414–0,447 | **±0,045…±0,099 / 0,393–0,454** (por encima de z 0,436 va bajo el ribete) |
+| Punta (x / z) | ±0,034…±0,047 / 0,400–0,418 | **±0,087…±0,104 / 0,380–0,399** |
+| Inclinación de la punta | 8,6° hacia delante | 12° hacia fuera y 12° hacia delante, siguiendo la cuerda |
 
-### 2. El logo sube 1,5 cm
-Mismo tamaño (13,2 × 2,9 cm sobre la tela) y mismo archivo; solo cambia la altura, para dejar margen sobre el bolsillo.
+Las puntas acaban por encima de z 0,380 a propósito: en `Tecleo` el portátil sube pegado al pecho izquierdo y su borde
+trasero barre la tela hasta z 0,376. Con la punta más abajo, el portátil la atravesaba al subir y al bajar (fotogramas
+8–10 y 42). Por eso el cordón no es más largo.
 
-| `Logo_Sudadera` | v014 | v015 |
+### 2. Márgenes
+
+| Margen (vista frontal) | v015 | v016 |
 |---|---|---|
-| Altura (z) | 0,3445–0,3731 | **0,3594–0,3879** |
-| Centro del plano en el script, antes de envolverlo a la tela | 0,395 | 0,4117 (`LOGO_Z`) |
+| Cuerda al logo | 2,6 cm (por encima) | **2,0 cm** (izquierda) · 2,7 cm (derecha) |
+| Punta al logo | 1,2 cm (por encima) | **2,1 cm** en horizontal (izquierda) · 2,8 cm (derecha) |
+| Punta al bolsillo (distancia mínima) | 5,3 cm | **4,6 cm** |
+| Punta a la costura del bolsillo | 5,9 cm | **5,9 cm** |
 
-Además, la textura del logo se muestrea con extensión **EXTEND** (en el `.glb`, `CLAMP_TO_EDGE`; el `.fbx` también la
-conserva). El logo toca los cuatro bordes de `quantic-logo-blanco.png` y con la repetición por defecto el filtrado
-traía el pie de las letras al borde superior: salían unas rayitas sobre «Quantic» (también en v014). El archivo de
-marca no se toca.
+El logo no es simétrico respecto al centro del cuerpo (x −0,0693 a +0,0622) y los cordones sí, por eso el margen
+izquierdo es el menor. Logo y bolsillo no se mueven respecto a v015.
 
-### 3. Cordones más cortos
-Cada cordón pierde 3,5 cm por abajo; el arranque en el cuello no se mueve y la punta sube con él.
+### 3. Contacto con la tela, los brazos y los accesorios
+- **Sudadera:** por debajo del ribete, cuerda y punta quedan a 1,2 mm de la tela (y a 1,0 mm del ribete) en todo el
+  recorrido; por encima de z 0,436 la cuerda entra bajo el ribete, que es por donde sale. (En v015 las puntas se
+  hundían 1,2 mm en la tela.)
+- **Animaciones** (comprobado fotograma a fotograma en el `.blend` y en el `.glb` y el `.fbx` importados): distancia
+  mínima de los cordones a brazos y mangas en `Idle` 5,0 cm, `Saludo` 3,1 cm, `Idea` 5,1 cm, `Relax` 0,7 cm y
+  `Organizar` 1,8 cm, sin contacto. En **`5 serio`** (brazos cruzados) y en **`Tecleo`** (la mano derecha teclea
+  delante del pecho) brazos y mangas pasan por encima de los cordones: en esas poses los propios brazos ya se hunden en
+  la sudadera, así que lo que esté sobre la tela queda bajo ellos. En los renders se ve el brazo por delante y el cordón
+  desaparece debajo, sin asomar a través. Pasaba igual con los cordones de v015.
+- **Portátil en `Tecleo`:** a 0,9 cm de la punta izquierda como mínimo (ver el punto 1).
 
-| Cordones (`Cordon_I/D`, `Cordon_Punta_I/D`) | v014 | v015 |
-|---|---|---|
-| Largo de la cuerda | 0,067 (z 0,379–0,447) | **0,032** (z 0,414–0,447) |
-| Punta (z) | 0,365–0,383 | **0,400–0,418** |
-| En el script | `CORD_SHORTEN` no existía | `CORD_SHORTEN = 0,0394` (unidades del script, antes de escalar a 1 m) |
+### 4. Comprobación
+De frente, de tres cuartos y de perfil, en los bustos de las siete expresiones, en todos los modos, en el `.glb`
+importado en un Blender limpio y cargado en three.js, y en el `.fbx` importado. Comparados píxel a píxel con los de
+v015, los renders solo cambian en la zona de los cordones: en `cooper_expresion_5_serio.png`,
+`cooper_trabajo_frente.png` y `cooper_relax_tres_cuartos.png` los cordones quedan detrás de los brazos, el portátil o la taza
+y la imagen es prácticamente la misma.
 
-### 4. Márgenes del logo
-
-| Margen | v014 | v015 |
-|---|---|---|
-| Logo sobre el borde del bolsillo (z 0,351) | −0,6 cm (el bolsillo llegaba más arriba que el pie del logo) | **0,9 cm** |
-| Logo sobre la costura del bolsillo | −2,6 cm (la costura cruzaba el logo) | **1,5 cm** |
-| Puntas de los cordones sobre el logo | −0,8 cm (las puntas pisaban el logo) | **1,2 cm** |
-
-Comprobado de frente, de tres cuartos y en los bustos de las expresiones (renders de Blender), en el `.glb`
-importado en un Blender limpio y cargado en three.js, y en el `.fbx` importado. El logo se ve entero en todas las
-vistas salvo donde lo tapa la pose, igual que en v014: en **5 serio** los brazos cruzados van delante del pecho (como
-en la hoja de personaje) y en **Trabajo** el portátil está delante del pecho.
-
-### 5. Comparación de bocas al día
-`modelo/renders/comparacion/bocas_glb_fbx_vs_renders.png` se regenera con la v015: las siete expresiones
-renderizadas desde Blender, desde el `.glb` importado y desde el `.fbx` importado, una fila cada uno. Las bocas
-coinciden en las tres filas:
-
-| Fotograma de `Expresiones` | Shape keys | `.glb` | `.fbx` |
-|---|---|---|---|
-| 0 neutro | ninguna | ninguna | ninguna |
-| 1 feliz | Risa 0,35 | Risa 0,35 | Risa 0,35 |
-| 2 sorprendido | O 1,0 | O 1,0 | O 1,0 |
-| 3 pensativo | Puchero 1,0 | Puchero 1,0 | Puchero 1,0 |
-| 4 guiñando | ninguna | ninguna | ninguna |
-| 5 serio | Plano 1,0 | Plano 1,0 | Plano 1,0 |
-| 6 risa | Risa 1,0 | Risa 1,0 | Risa 1,0 |
-
-Como en v013, en las filas del `.glb` y del `.fbx` los accesorios se ven, porque `Expresiones` no fija la visibilidad.
+### 5. Comparación de bocas
+`modelo/renders/comparacion/bocas_glb_fbx_vs_renders.png` se regenera con la v016. Las bocas siguen coincidiendo en las
+tres filas: feliz Risa 0,35 · sorprendido O 1,0 · pensativo Puchero 1,0 · guiñando ninguna · serio Plano 1,0 · risa
+Risa 1,0 (neutro, ninguna). Como antes, en las filas del `.glb` y del `.fbx` los accesorios se ven, porque
+`Expresiones` no fija la visibilidad.
 
 ### 6. Entrega
-Todos los renders regenerados (modos, expresiones y comparaciones) con la misma receta que v014 (Eevee, 32 muestras,
-vista Standard, 1600 × 2000, mismas cámaras, luces y fotogramas): comparados píxel a píxel con los de v014, solo cambia
-la zona del pecho. Las tres exportaciones, con los mismos ajustes que v014 (el `.glb` conserva la interpolación STEP
-de la boca en `Expresiones`, de 0 a 0,25 s). Archivos binarios por Git LFS.
+Todos los renders regenerados (modos, expresiones y comparaciones) con la misma receta que v014 y v015 (Eevee,
+32 muestras, vista Standard, 1600 × 2000, mismas cámaras, luces y fotogramas) y las tres exportaciones con los mismos
+ajustes (el `.glb` conserva la interpolación STEP de la boca en `Expresiones`, de 0 a 0,25 s). En `build_v016.py` el
+recorrido está en `CORD_PATH` (37 puntos, unidades del script) y la punta en `CORD_TIP`. Archivos binarios por Git LFS.
 
 ## Reparto de accesorios y brazos (sin cambios desde v011)
 
@@ -128,16 +117,19 @@ Saludo 200, Idea 300, Tecleo 400, Relax 500, Organizar 600). Para posar o render
 - El estado de la bombilla (`Luz` / `LuzOff`) solo lo cambia `Idea`; en reposo está encendida.
 - Las mangas nacen dentro del cuerpo de la sudadera; si un brazo se lleva muy atrás por código, la manga
   puede asomar por la espalda. Los clips entregados no lo hacen.
-- Los cordones quedan más cortos (3,2 cm de cuerda más la punta). Si se prefieren más largos, habría que separarlos
-  hacia los lados del logo o bajar el bolsillo; no se ha hecho para no cambiar nada más.
+- En `5 serio` y en `Tecleo` los brazos se hunden en la sudadera (también en v015). Si se corrigiera la pose para que
+  apoyen encima de la tela, habría que comprobar de nuevo los cordones.
+- Si un proyecto muestra el portátil durante `Expresiones` (ese clip no fija la visibilidad), en `3 pensativo` el
+  portátil, que sigue a la mano apoyada en la cara, roza el cordón izquierdo. Los renders de expresiones van sin
+  accesorios.
 
 ## Qué se infirió
 - Igual que en versiones anteriores: toda la geometría sale de una hoja de personaje raster sin escala
   real; la altura de 1,000 m es decisión nuestra y el grosor de cada pieza se dedujo de las vistas.
-- Cómo liberar el logo (corregir la costura del bolsillo, subir el logo 1,5 cm y acortar los cordones 3,5 cm) y los
-  márgenes (0,9 cm sobre el bolsillo y 1,2 cm bajo los cordones) son decisión del Modelador 3D, entre las opciones
-  que dio Quantic. En la hoja de personaje los cordones también acaban por encima del logo.
+- El recorrido de los cordones (arranque bajo el ribete en x ±0,05, apertura hacia fuera y caída casi vertical) es
+  decisión del Modelador 3D. Quantic pidió que caigan por los lados del logo, con al menos 1 cm de margen y sin
+  atravesar la tela. El largo lo limita la altura a la que sube el portátil en `Tecleo`.
 
-## Medidas (sin cambios)
-Alto 1,000 m, ancho 0,80 m, fondo 0,65 m en reposo con todos los accesorios en alto; topología 27 198 quads,
-388 triángulos y 63 n-gonos; 55 huesos.
+## Medidas
+Alto 1,000 m, ancho 0,80 m, fondo 0,65 m en reposo con todos los accesorios en alto (sin cambios); topología
+27 870 quads, 420 triángulos y 59 n-gonos (v015: 27 198 / 388 / 63, por los tubos de los cordones); 55 huesos.

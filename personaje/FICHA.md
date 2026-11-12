@@ -1,7 +1,7 @@
 # Ficha de Cooper
 
 Cooper es el pulpo, la mascota de Quantic. Esta ficha reúne lo que el Modelador 3D tiene de él a
-2026-11-06, tras quince versiones del modelo (`modelo/NOTAS.md` es la nota de la versión entregada, v015).
+2026-11-06, tras dieciséis versiones del modelo (`modelo/NOTAS.md` es la nota de la versión entregada, v016).
 
 **Qué es dato y qué decidió Quantic.** El aspecto, los colores y las expresiones salen de la hoja de
 personaje raster (cuatro vistas de cuerpo entero y seis expresiones) y de la tabla de identidad. La
@@ -115,7 +115,7 @@ brazo derecho; bombilla, móvil y checklist: tentáculos de abajo; el panel flot
 pueden ocultar por objeto. El reparto completo está en `modelo/NOTAS.md`.
 
 ## Expresiones y poses disponibles
-En el `.glb` y el `.fbx` van como animaciones (con las bocas); en el `.blend` como pistas NLA, cada clip en su rango de fotogramas. Versión v015.
+En el `.glb` y el `.fbx` van como animaciones (con las bocas); en el `.blend` como pistas NLA, cada clip en su rango de fotogramas. Versión v016.
 
 | Animación | Contenido | Accesorio visible |
 |---|---|---|
@@ -141,14 +141,14 @@ accesorios y con el mismo encuadre).
   `modelo/renders/modos/`: `cooper_idea_*`, `cooper_trabajo_*`, `cooper_relax_*`, `cooper_organizar_*`
   (de frente y de tres cuartos), `cooper_sin_accesorios_frente.png` y `cooper_saludo_*`. Las expresiones
   están en `modelo/renders/expresiones/`. Para una pose o expresión nueva se renderiza desde el `.blend`.
-- **Animaciones:** `modelo/animacion/cooper_v015_rig.fbx` (FBX) o el mismo `modelo/web/cooper_v015.glb`,
+- **Animaciones:** `modelo/animacion/cooper_v016_rig.fbx` (FBX) o el mismo `modelo/web/cooper_v016.glb`,
   que ya lleva el esqueleto. Esqueleto de 55 huesos: raíz, cuerpo, cabeza, mirada (los ojos la siguen), párpados, cejas, ojos felices, dientes,
   marcas, bombilla encendida/apagada, seis huesos de accesorio `Acc_*` y ocho cadenas de tres huesos con
   control IK en la punta: dos brazos (`T2_BrazoIzq`, `T7_BrazoDer`, con raíz en los hombros; las mangas van
   pesadas a la misma cadena) y seis tentáculos de abajo (`T1_Bombilla`, `T3_Movil`, `T4_PieIzq`,
   `T5_PieDer`, `T6_Checklist`, `T8_Trasero`); boca con shape keys (O, plano, risa, puchero). Los siete clips vienen incluidos;
   los de modo fijan solos qué accesorio se ve.
-- **Dentro de proyectos:** `modelo/web/cooper_v015.glb` (escala 1, Y arriba, 15 MB con texturas, esqueleto
+- **Dentro de proyectos:** `modelo/web/cooper_v016.glb` (escala 1, Y arriba, 15 MB con texturas, esqueleto
   y las siete animaciones; es el único `.glb`). Al cargarlo los seis accesorios están visibles: ocultar por nombre los que no
   toquen (`Acc_*`) o reproducir el clip del modo, que ya lo hace. Para pantallas con otro contenido,
   sustituir los PNG de pantalla y reexportar.

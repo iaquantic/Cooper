@@ -9,12 +9,13 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 | Parte | Estado | Origen |
 |---|---|---|
 | Personalidad y características | Definidas el 2026-11-06 (`personaje/FICHA.md`) | Aspecto: Modelador 3D · Personalidad: Quantic |
-| Modelo 3D | Entregado el 2026-11-12, versión v015 (v014 + logo del pecho libre del bolsillo y de los cordones, y comparación de bocas al día); notas en `modelo/NOTAS.md` | Modelador 3D |
+| Modelo 3D | Entregado el 2026-11-12, versión v016 (v015 + cordones más largos que caen por los lados del logo); notas en `modelo/NOTAS.md` | Modelador 3D |
 
 ## Pendientes
 
-- **Cordones:** en la v015 se acortaron 3,5 cm para no pisar el logo y han quedado cortos. Si se prefieren más
-  largos, habría que separarlos hacia los lados del logo o bajar el bolsillo.
+- **Brazos sobre los cordones:** en la expresión «5 serio» y en el modo Trabajo (`Tecleo`) los brazos pasan por
+  encima de los cordones, como ya pasaba con la tela de la sudadera. En los renders no se nota; arreglarlo del
+  todo exige tocar las animaciones.
 - **Logo:** se usa la versión blanca de letras estilizadas, la misma que la web publicada. La página del manual
   de marca muestra «Quantic» con letras normales. Falta confirmar cuál es el oficial.
 
@@ -28,7 +29,7 @@ modelo/
   web/              Único .glb: web, tiempo real y animación (con esqueleto)
   animacion/        Versión FBX con esqueleto para animar
   renders/          Imágenes con fondo transparente: modos/, expresiones/ y comparacion/ (.png)
-  NOTAS.md          Notas de la versión entregada (v015): nombres de accesorios y visibilidad por modo
+  NOTAS.md          Notas de la versión entregada (v016): nombres de accesorios y visibilidad por modo
 SOLICITUD-MODELADOR-3D.md   Pedido al Modelador 3D
 ```
 

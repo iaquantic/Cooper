@@ -1,4 +1,10 @@
-# Cooper (mascota Quantic) — construcción v015 (Blender 5.2, ejecutar dentro de Blender)
+# Cooper (mascota Quantic) — construcción v016 (Blender 5.2, ejecutar dentro de Blender)
+# v016 (pedido de Quantic: «alarga los cordones separándolos hacia los lados del logo»): cada cordón es un tubo que sale de
+# debajo del ribete del cuello (en el mundo, x ±0,05 m; en v015 era un cilindro recto en x ±0,04 que flotaba 2,5 cm delante
+# del cuello), apoya en la tela con 1,2 mm de holgura y baja abriéndose hasta caer por los lados del logo. CORD_PATH es su
+# recorrido (puntos calculados sobre la sudadera y suavizados; ver modelo/NOTAS.md) y CORD_TIP la punta. Las puntas acaban
+# por encima de la altura a la que el portátil sube en Tecleo (su borde trasero barre la tela del pecho izquierdo).
+# Nada más cambia respecto a v015.
 # v015 (revisión de Quantic de la v014): el logo del pecho se ve entero y limpio. (1) La costura del bolsillo canguro
 # (Costura_Bolsillo) se escalaba en el eje equivocado (0,6 en la profundidad en vez de en la altura) y era un aro 2 cm más
 # alto que el bolsillo que cruzaba el pie del logo: ahora sigue el borde del bolsillo al 82 % en ancho y en alto
@@ -39,7 +45,7 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix
 from mathutils.geometry import interpolate_bezier
 
-BASE = os.environ.get("COOPER_BASE", r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v015")   # v015: COOPER_BASE permite ejecutarlo fuera del PC de trabajo
+BASE = os.environ.get("COOPER_BASE", r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v016")   # v015: COOPER_BASE permite ejecutarlo fuera del PC de trabajo
 TEX = os.path.join(BASE, "texturas")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
@@ -303,11 +309,33 @@ so = hoodback.modifiers.new("grosor", 'SOLIDIFY'); so.thickness = 0.022; so.offs
 bpy.ops.object.select_all(action='DESELECT'); hoodback.select_set(True); vl.objects.active = hoodback
 bpy.ops.object.modifier_apply(modifier="grosor")
 hem = torus("Sudadera_Bajo", (0, 0, 0.285), 0.155, 0.024, m=M['sudadera'])
-CORD_SHORTEN = 0.0394   # v015: los cordones pierden 3,9 cm (3,5 cm en el mundo tras escalar a 1 m) por abajo; el arranque en el cuello no se mueve
-CORD_AX = Vector((0, -math.sin(0.15), math.cos(0.15)))   # eje del cordón (girado 0,15 rad en X), hacia arriba
-for side, sx in (("I", -1), ("D", 1)):
-    cyl(f"Cordon_{side}", Vector((sx * 0.045, -0.160, 0.455)) + CORD_AX * (CORD_SHORTEN / 2), 0.006, 0.075 - CORD_SHORTEN, m=M['cuerda'], rot=(0.15, 0, 0))
-    cyl(f"Cordon_Punta_{side}", Vector((sx * 0.045, -0.155, 0.412)) + CORD_AX * CORD_SHORTEN, 0.0075, 0.018, m=M['cuerda'], rot=(0.15, 0, 0))
+# v016: recorrido del cordón izquierdo (I) en unidades del script; el derecho (D) es su reflejo en X
+CORD_PATH = [
+    (-0.05560, -0.11727, 0.49474), (-0.05675, -0.12132, 0.49423), (-0.05791, -0.12518, 0.49360), (-0.05909, -0.12870, 0.49276),
+    (-0.06031, -0.13178, 0.49166), (-0.06160, -0.13440, 0.49027), (-0.06299, -0.13659, 0.48861), (-0.06452, -0.13842, 0.48672),
+    (-0.06619, -0.13997, 0.48463), (-0.06804, -0.14132, 0.48241), (-0.07007, -0.14254, 0.48012), (-0.07221, -0.14351, 0.47771),
+    (-0.07452, -0.14447, 0.47534), (-0.07632, -0.14411, 0.47293), (-0.07820, -0.14367, 0.47052), (-0.08012, -0.14317, 0.46816),
+    (-0.08209, -0.14271, 0.46589), (-0.08410, -0.14234, 0.46372), (-0.08610, -0.14202, 0.46161), (-0.08806, -0.14175, 0.45956),
+    (-0.08995, -0.14151, 0.45755), (-0.09177, -0.14130, 0.45560), (-0.09348, -0.14112, 0.45372), (-0.09507, -0.14098, 0.45191),
+    (-0.09652, -0.14085, 0.45017), (-0.09784, -0.14075, 0.44852), (-0.09902, -0.14070, 0.44695), (-0.10005, -0.14068, 0.44546),
+    (-0.10095, -0.14071, 0.44403), (-0.10171, -0.14078, 0.44267), (-0.10236, -0.14089, 0.44137), (-0.10289, -0.14104, 0.44012),
+    (-0.10332, -0.14122, 0.43892), (-0.10368, -0.14142, 0.43777), (-0.10397, -0.14163, 0.43665), (-0.10421, -0.14186, 0.43557),
+    (-0.10444, -0.14210, 0.43450),
+]
+CORD_TIP = (-0.10625, -0.14463, 0.42927); CORD_TIP_DOWN = (-0.20170, -0.20935, -0.95681)   # centro y eje (hacia abajo) de la punta izquierda
+def cord_tube(name, pts, r, m):
+    """tubo de cuerda a lo largo de pts (curva POLY con bisel redondo y tapas), convertido a malla"""
+    cd = bpy.data.curves.new(name, 'CURVE'); cd.dimensions = '3D'; cd.bevel_depth = r; cd.bevel_resolution = 3
+    cd.fill_mode = 'FULL'; cd.use_fill_caps = True
+    sp = cd.splines.new('POLY'); sp.points.add(len(pts) - 1)
+    for p, v in zip(sp.points, pts): p.co = (v[0], v[1], v[2], 1)
+    o = bpy.data.objects.new(name, cd); C_CHAR.objects.link(o); o.data.materials.append(m)
+    bpy.ops.object.select_all(action='DESELECT'); o.select_set(True); vl.objects.active = o
+    bpy.ops.object.convert(target='MESH'); bpy.ops.object.shade_smooth(); return o
+for side, sx in (("I", 1), ("D", -1)):
+    cord_tube(f"Cordon_{side}", [(sx * x, y, z) for x, y, z in CORD_PATH], 0.006, M['cuerda'])
+    tip_down = Vector((sx * CORD_TIP_DOWN[0], CORD_TIP_DOWN[1], CORD_TIP_DOWN[2]))
+    cyl(f"Cordon_Punta_{side}", (sx * CORD_TIP[0], CORD_TIP[1], CORD_TIP[2]), 0.0075, 0.018, m=M['cuerda'], rot=(-tip_down).to_track_quat('Z', 'Y').to_euler())
 pocket = qsphere("Sudadera_Bolsillo", (0, -0.155, 0.335), 0.085, scale=(1.4, 0.35, 0.6), m=M['sudadera'], levels=2)
 # costuras: hilo visible en el borde del bolsillo, el bajo, el cuello y los hombros
 # (toros finos medio hundidos en la tela: solo asoma la mitad exterior del hilo)
@@ -1115,4 +1143,4 @@ for o in bpy.data.objects:
     if o.type == 'MESH' and not o.hide_render:
         for p in o.data.polygons:
             n = len(p.vertices); quads += n == 4; tris += n == 3; ngons += n > 4
-print("BUILD v015 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
+print("BUILD v016 OK · escala %.4f · objetos %d · huesos %d · caras quad/tri/ngon %d/%d/%d" % (ESCALA, len(bpy.data.objects), len(arm_data.bones), quads, tris, ngons))
