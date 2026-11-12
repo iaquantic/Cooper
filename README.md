@@ -16,8 +16,8 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 - **Brazos sobre los cordones:** en la expresión «5 serio» y en el modo Trabajo (`Tecleo`) los brazos pasan por
   encima de los cordones, como ya pasaba con la tela de la sudadera. En los renders no se nota; arreglarlo del
   todo exige tocar las animaciones.
-- **Logo:** se usa la versión blanca de letras estilizadas, la misma que la web publicada. La página del manual
-  de marca muestra «Quantic» con letras normales. Falta confirmar cuál es el oficial.
+- **v017, en curso:** el logo de la sudadera, el portátil y la taza se hizo con una copia del logo que tiene la
+  última «c» invertida. Se cambia por el oficial, el de la web publicada.
 
 ## Estructura
 

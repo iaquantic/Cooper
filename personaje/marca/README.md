@@ -2,9 +2,13 @@
 
 Archivos copiados del repositorio de la web de Quantic (iaquantic/quantic-web) el 2026-11-10.
 
+**Logo oficial:** el que usa la web publicada, https://quantic.bequantic.org/ (confirmado por Quantic el 2026-11-12).
+El 2026-11-12 se cambió `quantic-logo-blanco.png` por ese archivo: la copia anterior venía de
+`assets/quantic-blanco.png`, que tiene la última «c» invertida.
+
 | Archivo | Qué es | Origen en quantic-web |
 |---|---|---|
-| `quantic-logo-blanco.png` | Logo completo, versión blanca para fondos oscuros (3546 × 758) | `assets/quantic-blanco.png` |
+| `quantic-logo-blanco.png` | Logo completo, versión blanca para fondos oscuros (3546 × 758) | `quantic_blanco_1-mshlmdun-vs5j.png` (el de la web publicada) |
 | `quantic-isotipo-blanco.png` | Isotipo, versión blanca para fondos oscuros (1490 × 1407) | `quantic_isotipo_blanco-mshlp1hj-04cz.png` |
 
 ## Colores oficiales
