@@ -13,9 +13,7 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 
 ## Pendientes
 
-- **Texturas de `build_v019.py`:** el script lee las texturas de la carpeta `texturas/` de la versión, en el PC del
-  Modelador, y allí no existen las de la v017, la v018 ni la v019. Antes de volver a ejecutarlo hay que crearla
-  (detalle en `modelo/NOTAS.md`, punto 7).
+Ninguno.
 
 ## Estructura
 
@@ -23,7 +21,8 @@ Este repositorio es la fuente única de Cooper: quién es, cómo se ve y los arc
 personaje/
   FICHA.md          Personalidad, rasgos físicos, colores, voz, qué hace y qué no
 modelo/
-  blend/            Archivo de trabajo de Blender (.blend)
+  blend/            Archivo de trabajo de Blender (.blend) y build_v019.py, que lo reconstruye
+    texturas/       Texturas y mapa UV horneado que lee build_v019.py (sin depender de ninguna carpeta externa)
   web/              Único .glb: web, tiempo real y animación (con esqueleto)
   animacion/        Versión FBX con esqueleto para animar
   renders/          Imágenes con fondo transparente: modos/, expresiones/ y comparacion/ (.png)

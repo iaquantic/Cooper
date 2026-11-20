@@ -70,8 +70,15 @@ import bpy, math, bmesh, random, os
 from mathutils import Vector, Matrix, Quaternion
 from mathutils.geometry import interpolate_bezier
 
-BASE = os.environ.get("COOPER_BASE", r"C:\Trabajo\Modelador 3D\proyectos\mascota-quantic\v019")   # v015: COOPER_BASE permite ejecutarlo fuera del PC de trabajo
+# v019: las texturas van en el repositorio, en la carpeta texturas/ junto a este script (modelo/blend/texturas): sin COOPER_BASE,
+# BASE es la carpeta del script. COOPER_BASE (v015) sigue sirviendo para usar otra carpeta con su propio texturas/.
+def _script_dir():
+    try: return os.path.dirname(os.path.abspath(__file__))
+    except NameError:   # pegado en el editor de texto de Blender: la carpeta del .blend abierto
+        return os.path.dirname(bpy.data.filepath) if bpy.data.filepath else os.getcwd()
+BASE = os.environ.get("COOPER_BASE") or _script_dir()
 TEX = os.path.join(BASE, "texturas")
+if not os.path.isdir(TEX): raise FileNotFoundError(f"no está la carpeta de texturas: {TEX}")
 sc = bpy.context.scene; vl = bpy.context.view_layer
 if bpy.context.mode != 'OBJECT':
     bpy.ops.object.mode_set(mode='OBJECT')
@@ -1265,7 +1272,10 @@ bg = w.node_tree.nodes.get("Background"); bg.inputs[0].default_value = (0.09, 0.
 sc.render.engine = 'BLENDER_EEVEE'; sc.eevee.taa_render_samples = 32
 sc.view_settings.view_transform = 'Standard'; sc.view_settings.look = 'None'
 sc.render.resolution_x = 800; sc.render.resolution_y = 1000; sc.render.resolution_percentage = 100
-# ---------------------------------------------------------------- horneado de texturas (llamar a bake_all() tras el script)
+# ---------------------------------------------------------------- horneado de texturas
+# v019: al final del script se cargan las texturas horneadas de TEX y su mapa UV con bake_reuse(TEX) (lo normal: no escribe nada).
+# Solo con COOPER_BAKE=1 se hornea de nuevo (bake_all), y eso sobrescribe cabeza_*, cuerpo_*, sudadera_normal.png y
+# uv_horneado.npz en TEX.
 HEAD = [head, bpy.data.objects["Parpado_I"], bpy.data.objects["Parpado_D"]]
 BODY = [body] + list(tent_meshes.values())
 SKIN = HEAD + BODY
@@ -1338,8 +1348,27 @@ def bake_finish():
         for sl in o.material_slots:
             if sl.material and sl.material.name != 'Q_SudaderaInterior': sl.material = m_sud
     sc.render.engine = 'BLENDER_EEVEE'; print("materiales horneados asignados")
+# v019: el desenvuelto automático (smart_project) no da el mismo mapa UV en cada versión de Blender ni en cada geometría, y las
+# texturas horneadas solo valen con el mapa con el que se hornearon. Por eso el mapa UV de las 19 piezas horneadas va guardado junto
+# a las texturas (TEX/uv_horneado.npz): bake_all lo escribe y bake_reuse lo aplica en lugar de volver a desenvolver.
+UV_FILE = "uv_horneado.npz"
+def save_uv(dst_dir):
+    import numpy as np
+    d = {}
+    for o in HEAD + BODY + HOODIE:
+        me = o.data; a = np.empty(len(me.loops) * 2, dtype=np.float32); me.uv_layers.active.data.foreach_get("uv", a); d[o.name] = a.reshape(-1, 2)
+    np.savez_compressed(os.path.join(dst_dir, UV_FILE), **d); print("mapa UV horneado guardado en", dst_dir)
+def load_uv(src_dir):
+    import numpy as np
+    z = np.load(os.path.join(src_dir, UV_FILE))
+    for o in HEAD + BODY + HOODIE:
+        a = z[o.name]; me = o.data
+        if len(a) != len(me.loops):
+            raise RuntimeError(f"{o.name}: el mapa UV guardado tiene {len(a)} esquinas y la malla {len(me.loops)}; la geometría cambió: hay que hornear (COOPER_BAKE=1)")
+        if not me.uv_layers: me.uv_layers.new(name="UVMap")
+        me.uv_layers.active.data.foreach_set("uv", a.ravel()); me.update()
 def bake_all():
-    bake_head(); bake_body(); bake_hoodie(); bake_finish()
+    bake_head(); bake_body(); bake_hoodie(); save_uv(TEX); bake_finish()
 def reuse_head(src_dir):
     """v011: la cabeza no cambia; se desenvuelve igual y se cargan sus texturas. Cuerpo (brazos nuevos) y sudadera (mangas) se hornean de nuevo."""
     _unwrap(HEAD, margin=0.006)
@@ -1353,8 +1382,9 @@ def reuse_hoodie(src_dir):
     img = bpy.data.images.load(os.path.join(src_dir, "sudadera_normal.png")); img.name = "sudadera_normal"; img.colorspace_settings.name = 'Non-Color'
     BAKED["sudadera"] = (None, img); print("sudadera reutilizada de", src_dir)
 def bake_reuse(src_dir):
-    """mismo desenvuelto que el horneado (determinista para la misma geometría) y texturas ya horneadas de otra versión"""
-    _unwrap(HEAD, margin=0.006); _unwrap(BODY, margin=0.004); _unwrap(HOODIE, margin=0.006)
+    """texturas ya horneadas y el mapa UV con el que se hornearon (v019: uv_horneado.npz; sin él, desenvuelto automático como antes)"""
+    if os.path.exists(os.path.join(src_dir, UV_FILE)): load_uv(src_dir)
+    else: _unwrap(HEAD, margin=0.006); _unwrap(BODY, margin=0.004); _unwrap(HOODIE, margin=0.006)
     def load(fn, color):
         img = bpy.data.images.load(os.path.join(src_dir, fn)); img.name = fn.replace(".png", "")
         img.colorspace_settings.name = 'sRGB' if color else 'Non-Color'; return img
@@ -1362,6 +1392,10 @@ def bake_reuse(src_dir):
     BAKED["cuerpo"] = (load("cuerpo_color.png", True), load("cuerpo_normal.png", False))
     BAKED["sudadera"] = (None, load("sudadera_normal.png", False))
     bake_finish(); print("texturas reutilizadas de", src_dir)
+if os.environ.get("COOPER_BAKE") == "1":
+    print("COOPER_BAKE=1: se hornean de nuevo las texturas en", TEX); bake_all()
+else:
+    bake_reuse(TEX)
 # recuento de topología
 quads = tris = ngons = 0
 for o in bpy.data.objects:

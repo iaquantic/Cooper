@@ -9,12 +9,13 @@ Archivos de esta versión en el repositorio `iaquantic/Cooper`:
 | Archivo | Qué es |
 |---|---|
 | `modelo/blend/cooper_v019.blend` | Archivo de trabajo de Blender 5.2 con las texturas empaquetadas (autónomo). |
-| `modelo/blend/build_v019.py` | Script que reconstruye Cooper desde cero (mismas texturas y recetas que v018, ver punto 6). La variable de entorno `COOPER_BASE` permite indicar la carpeta de la versión fuera del PC de trabajo. |
+| `modelo/blend/build_v019.py` | Script que reconstruye Cooper desde cero, con las texturas de `modelo/blend/texturas/` (ver punto 7). `COOPER_BASE` permite usar otra carpeta con su propio `texturas/`. |
+| `modelo/blend/texturas/` | Las 12 texturas que lee el build (las mismas, byte a byte, que lleva empaquetadas el `.blend`), el mapa UV con el que se hornearon (`uv_horneado.npz`) y en `origen/` las dos pantallas de v014 de las que salen las de v018. |
 | `modelo/web/cooper_v019.glb` | **Único `.glb`**: para web, tiempo real y animación. Escala 1, Y arriba, texturas (logos de marca incluidos), esqueleto de 55 huesos, shape keys y las 7 animaciones con las bocas. |
 | `modelo/animacion/cooper_v019_rig.fbx` | Versión FBX con esqueleto, shape keys animadas, texturas incrustadas y las 7 tomas. |
 | `modelo/renders/modos/` | PNG 1600 × 2000 con fondo transparente, todos de v019. |
 | `modelo/renders/expresiones/` | Las siete expresiones, de v019 (sin accesorios). |
-| `modelo/renders/comparacion/` | Las cuatro comparaciones y `bocas_glb_fbx_vs_renders.png`, de v019. |
+| `modelo/renders/comparacion/` | Las cuatro comparaciones, `bocas_glb_fbx_vs_renders.png` y `navegador_clips_x_expresiones.png` (el `.glb` en three.js), de v019. |
 
 Colores, texturas, logo del pecho y de la taza, pantallas, proporciones, esqueleto (55 huesos), nombres de los clips y de
 los `Acc_*`, duraciones y visibilidad por modo: **iguales que en v018**. Cambian las poses de las animaciones, el reposo de
@@ -107,11 +108,34 @@ de la manga se hundía más que la piel. Dos cambios en `build_v019.py`:
 
 Nada de esto se ve en reposo: la manga, el puño y la mano tienen la misma forma que en v018.
 
-### 7. Texturas en la carpeta de la versión
-Igual que en v018: el `.blend` es autónomo, pero `build_v019.py` lee las texturas de `BASE/texturas`, que en el PC del
-Modelador (`proyectos/mascota-quantic/v019/texturas`) no existe todavía. Son las mismas que las de v018: las de v014 más
-`quantic-logo-blanco.png` (de `personaje/marca/`), `taza.png`, `pantalla_laptop.png` y `pantalla_movil.png` (las tres
-últimas se generan con `taza_png()`, `pantalla_laptop_png()` y `pantalla_movil_png()` o se extraen del `.blend`).
+### 7. Texturas en el repositorio
+`build_v019.py` ya no depende de ninguna carpeta del PC del Modelador. Sin `COOPER_BASE`, toma como base la carpeta del propio
+script y lee las texturas de `modelo/blend/texturas/`, que están en el repositorio (con Git LFS, 12,6 MB):
+
+- **Las 12 que lee el build**, extraídas del `.blend` entregado e idénticas byte a byte a las que lleva empaquetadas: el logo y
+  el isotipo oficiales (iguales a los de `personaje/marca/`), `taza.png`, `pantalla_laptop.png`, `pantalla_movil.png`,
+  `teclas.png`, `checklist.png` y las horneadas de v014 (`cabeza_color`, `cabeza_normal`, `cuerpo_color`, `cuerpo_normal` y
+  `sudadera_normal`). Las tres generadas se comprobaron: `taza_png()` con el logo oficial, y `pantalla_laptop_png()` y
+  `pantalla_movil_png()` con las pantallas de `origen/` y el logo, dan los mismos píxeles (y los mismos bytes) que las de la carpeta.
+- **`uv_horneado.npz`:** el mapa UV de las 19 piezas horneadas (cabeza, párpados, cuerpo, tentáculos, sudadera y mangas) con el
+  que se hornearon esas texturas. El desenvuelto automático no lo reproduce (sale otro mapa y la piel quedaría mal colocada), así que
+  `bake_reuse()` aplica este mapa en lugar de volver a desenvolver.
+- **`origen/`:** `pantalla_laptop_v014.png` y `pantalla_movil_v014.png`, las pantallas de v014–v017 de las que salen las de v018.
+
+Al terminar, el script llama a `bake_reuse(TEX)`: carga las texturas y el mapa UV y **no escribe nada**. Solo con la variable
+`COOPER_BAKE=1` hornea de nuevo (`bake_all()`, en Cycles), y entonces sobrescribe en `texturas/` las cinco horneadas y
+`uv_horneado.npz`. Si la geometría de las piezas horneadas cambia en una versión futura, el mapa guardado no encaja y el script
+se detiene pidiendo hornear.
+
+**Comprobado** desde una copia limpia del repositorio (lo preparado para commit, sin `COOPER_BASE` ni otras carpetas):
+`blender -b --python modelo/blend/build_v019.py` construye el modelo completo y no modifica ningún archivo de la copia. Frente al
+`.blend` entregado:
+- mapas UV de los 89 objetos con UV: iguales;
+- materiales de cada objeto e imágenes (bytes, tamaño, espacio de color y extensión): iguales;
+- mallas deformadas de los 91 objetos en 37 fotogramas de los 7 clips: diferencia máxima 0,06 mm, solo en los cordones (y
+  0,02 mm en el logo del pecho), que en v016–v017 se ajustaron sobre el `.blend` y el script reproduce con esa precisión;
+- render de cuatro vistas: solo cambian algunos píxeles del borde de los cordones y del logo (como máximo 481 de 512 000 con
+  más de 2/255). A simple vista, iguales.
 
 ## Comprobación de las exportaciones
 - **`.blend`:** se hizo sobre el de v018 cambiando solo las animaciones, la posición de los vértices del brazo bajo la manga
@@ -122,6 +146,18 @@ Modelador (`proyectos/mascota-quantic/v019/texturas`) no existe todavía. Son la
   las texturas sin cambios: pecho, isotipo de la tapa y pantallas en `CLAMP_TO_EDGE`; taza en `REPEAT`.
 - **`.fbx`:** misma estructura que el de v018 (objetos, huesos, tomas con sus duraciones y shape keys).
 - **Bocas:** coinciden en las tres filas de `bocas_glb_fbx_vs_renders.png` (Blender, `.glb` importado, `.fbx` importado).
+
+## Comprobación en el navegador (three.js)
+El `.glb` se cargó en Chromium sin pantalla con three.js r170 (`GLTFLoader` y `AnimationMixer`), el 2026-11-20:
+- Carga en 0,3 s, sin errores ni avisos en la consola; 28 mallas con piel y 29 197 vértices.
+- Cada dos fotogramas de los siete clips (181 poses), la caja de cada pieza deformada en el navegador se comparó con la
+  de Blender: en los seis clips de modo la diferencia máxima es 0,1 mm, y ningún vértice sale fuera de rango.
+- `navegador_clips_x_expresiones.png`: cada clip en su fotograma central con la cara de cada expresión encima (huesos de
+  la cara y pesos de la boca tomados de `Expresiones`, el resto del cuerpo del clip). Las 49 combinaciones se ven bien.
+- **Aviso para quien programe la web:** los pesos de la boca usan interpolación `STEP`, con una clave por expresión en
+  `k/24` s. Si se salta exactamente a ese tiempo, el redondeo de los tiempos a 32 bits hace que en 1 feliz, 2 sorprendido
+  y 4 guiñando se vea la boca de la expresión anterior. Para mostrar la expresión `k`, usar `k/24 + 0.001` s. Al
+  reproducir los clips de forma normal no pasa.
 
 ## Renders
 Todos regenerados con la receta de siempre (Eevee, 32 muestras, Standard, 1600 × 2000): cambian las poses de los modos, el
@@ -165,7 +201,6 @@ Saludo 200, Idea 300, Tecleo 400, Relax 500, Organizar 600). Para posar o render
   puede asomar por la espalda. Los clips entregados no lo hacen.
 - La matriz cubre los siete clips entregados con las siete caras. Una pose nueva hecha por código (o mezclar clips) no está
   comprobada: si un proyecto la necesita, conviene pedirla como versión nueva.
-- Carpeta `texturas` de v019 en el PC del Modelador: ver el punto 7.
 
 ## Qué se infirió
 - Igual que en versiones anteriores: toda la geometría sale de una hoja de personaje raster sin escala
